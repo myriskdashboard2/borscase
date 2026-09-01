@@ -1,0 +1,538 @@
+========================================================================
+  BORSCASE
+  Letar case bland 217 bolag - pa siffror OCH pa vad rapporterna sager
+========================================================================
+
+
+SA KOMMER DU IGANG
+------------------
+1. Dubbelklicka INSTALLERA.bat   (bara forsta gangen)
+2. Dubbelklicka SKANNA.bat       (forsta gangen tar nagra minuter)
+3. Dubbelklicka STARTA_APP.bat   -> webblasaren oppnas av sig sjalv
+4. Dubbelklicka STOPPA_APP.bat   nar du ar klar
+
+Allt kors lokalt. Inga API-nycklar, ingen inloggning, inga riktiga pengar
+rors, ingenting skickas nagonstans. All hamtad data hamnar i cache/.
+
+
+DET VIKTIGASTE FORST
+--------------------
+Poangen i Jakt-fliken ar INTE en prognos och INTE en kopsignal.
+
+Appen har testat sig sjalv atta ganger, med atta olika rangordningar. Alla
+foll. Fliken Validering visar hela tavlan; sa har ser den ut:
+
+  Vad som testades                Topp    Botten   Topp-botten   p
+  ---------------------------------------------------------------------
+  Bara rapporttexten              27,7 %  32,7 %      -5,0 pp   0,757
+  Bara finansiell styrka          29,9 %  37,9 %      -8,0 pp   0,343
+  Bara tillvaxt                   27,7 %  36,8 %      -9,1 pp   0,460
+  Bara vardering                  27,7 %  38,8 %     -11,1 pp   0,710
+  Bara marknad (momentum)         17,8 %  35,1 %     -17,3 pp   1,000
+  Alla pelare sammanvagda         25,6 %  43,9 %     -18,3 pp   0,890
+  Alla pelare + rapporttext       23,3 %  43,8 %     -20,6 pp   0,970
+  Bara kvalitet                   22,3 %  47,8 %     -25,5 pp   0,997
+
+SAMTLIGA har NEGATIV topp-minus-botten. De lagst rankade bolagen gick alltsa
+battre an de hogst rankade, i varje enskild variant. Det ar ett konsekvent
+monster, inte slump i en korning.
+
+Dessutom testades riktningen efter rapport pa 5085 rapporttillfallen:
+50,8 % traffsakerhet, mot 50,9 % for att alltid gissa upp. Slantsingling.
+
+VAD DET INTE BETYDER: att matten ar pahittade. Piotroski, Altman, Novy-Marx
+och Lazy Prices har femtio ars forskning bakom sig. Det betyder att perioden
+2013-2025 i just det har universumet gick at andra hallet - olonsamma
+tillvaxtbolag slog kvalitet och varde med bred marginal - och att tretton ar
+ar for kort for att luta sig mot.
+
+VAD DET BETYDER FOR DIG: anvand appen for att FORSTA bolag och UNDVIKA
+uppenbara problem, inte for att valja vinnare. Det den ar bevisat bra pa ar
+att visa vad som star i rapporterna, vad ett bolag brukar rora sig, och vilka
+bolag som spar pengar de inte har. Ingen av de sakerna kraver en prognos.
+
+
+VAD APPEN FAKTISKT GOR
+----------------------
+Fem pelare per bolag, allt rangordnat mot de andra bolagen (percentil):
+
+  KVALITET     ROIC, bruttolonsamhet (Novy-Marx), Greenblatts avkastning pa
+               rorelsekapital, kassaflode delat med vinst, marginalstabilitet
+  VARDERING    EBIT/EV (Greenblatts earnings yield), fritt kassaflode / EV,
+               EV/EBITDA, P/E, P/B
+  FIN. STYRKA  Piotroski F-score, Altman Z'', soliditet, nettoskuld/EBITDA,
+               rantetackning
+  TILLVAXT     Omsattning, vinst och kassaflode 3 ar, marginaltrend
+  MARKNAD      Momentum 12-1 (Jegadeesh-Titman), avstand till arstopp, volatilitet
+  RAPPORT      Sprakforandring, tonlage, roda flaggor, nya riskstycken
+
+Plus avdrag som dras rakt av: Beneish M-score over troskeln, hoga
+periodiseringar (Sloan), snabb balansrakningstillvaxt (Cooper-Gulen-Schill),
+utspadning, Altman i nodzonen, svag Piotroski, kraftigt omskrivet
+riskavsnitt, och gar-vidare-tvivel.
+
+Varje matt ar publicerat och provat av nagon annan an mig. Kallorna star i
+fliken Metod. Det ar avsiktligt: en modell full av egna formler gar alltid
+att fa att se bra ut pa historisk data.
+
+
+TACKNING - SIFFRAN DU SKA LASA BREDVID POANGEN
+-----------------------------------------------
+Alla matt betyder inte samma sak i alla branscher, och da stangs de av i
+stallet for att raknas fel:
+
+  BANK              Har LAG soliditet, ingen bruttovinst och inget
+                    rorelsekapital. Det ar affarsmodellen, inte en svaghet.
+                    Foretagsvarde och nettoskuld saknar mening nar skulder AR
+                    ravaran. Piotroski och Altman ar dessutom framtagna for
+                    icke-finansiella bolag.
+                    MEN: bankerna far i stallet en EGEN uppsattning matt och
+                    jamfors bara med varandra. K/I-tal (kostnad delat med
+                    intakt - det viktigaste effektivitetsmattet for en bank),
+                    rantenetto delat med tillgangar, eget kapital delat med
+                    tillgangar, andel intakter utanfor rantenettot, ROE och
+                    P/B. Swedbank har darfor 100 % tackning, inte 40 %.
+                    Amerikanska banker saknar K/I eftersom Yahoo inte lamnar
+                    rorelsekostnader for dem - de far 84 % i stallet.
+  INVESTMENTBOLAG   Redovisad vinst = i huvudsak orealiserade
+                    vardeforandringar pa innehaven, alltsa borsens rorelse
+                    bokford som resultat. P/E, marginaler och tillvaxt mater
+                    ingenting. Kvar blir P/B och momentum.
+  FASTIGHET         Resultatet domineras av vardeforandringar, och fritt
+                    kassaflode ar negativt per konstruktion eftersom
+                    fastighetskop bokfors som investering.
+
+VARFOR VISSA BOLAG SAKNAS I JAKT-FLIKEN
+Standardfiltret ar 80 % tackning, och elva bolag ligger under det: fem
+fastighetsbolag (Fabege, Castellum, Sagax, Wallenstam, Balder), fem
+investmentbolag och SSAB. De FINNS i skanningen och syns i Insyn- och
+Omskrivet-flikarna - de filtreras bara bort i Jakt.
+
+Under tabellen star numera hur manga bolag filtren doljer, vilka de ar, och en
+knapp "Visa alla" som nollstaller alla filter. Ett filter som gommer tyst ar
+samma sak som en bugg.
+
+Utan den har regeln toppades listan av Investor och Industrivarden pa ett
+"P/E 8" som inte betyder nagonting. Nu far de i stallet LAG TACKNING, och
+under 35 % av modellen satts ingen poang alls - bolaget ar inte jamforbart
+med ett som granskats av alla fem pelarna. Standardfiltret i Jakt-fliken ar
+80 % tackning; sank det till 60 % om du vill se bankerna ocksa.
+
+
+RAPPORTKALENDERN OCH RIKTNINGSGISSNINGEN
+----------------------------------------
+Kolumnen "Rapport" i Jakt-fliken visar dagar till nasta rapport, och under den
+hur mycket aktien BRUKAR rora sig pa rapportdagen. Klicka pa rubriken for att
+sortera - narmast rapport hamnar overst. Tilde (~) betyder att datumet ar
+uppskattat ur bolagets rapportrytm i stallet for bekraftat.
+
+Reaktionen mats i ratt fonster: svenska bolag rapporterar pa morgonen, sa
+reaktionen ar samma dags stangning mot gardagens. Amerikanska rapporterar efter
+stangning, sa deras reaktion ar nasta dags stangning. Missar man det mater man
+fel dag for halva universumet.
+
+DU FICK OCKSA EN RIKTNINGSGISSNING - LAS DET HAR INNAN DU ANVANDER DEN:
+
+  Modellens traffsakerhet:     50,8 %
+  Gissa alltid upp:            50,9 %
+  Slantsingling:               50,0 %
+  p mot slantsingling:         0,122
+
+Testat rullande framat pa 5085 rapporter i 209 bolag, dar varje rapport gissas
+med ENBART tidigare rapporter som underlag. Modellen ar alltsa SAMRE an att
+alltid gissa upp, och gar inte att skilja fran slumpen.
+
+Sa: riktningen gar inte att forutsaga. Sannolikheten star kvar i appen for att
+du bad om den, men den star alltid med traffsakerheten bredvid sig sa att den
+inte kan lasas som nagot annat an vad den ar - en historisk andel.
+
+Det som DAREMOT ar vart nagot pa det kortet ar STORLEKEN. Att Ericsson brukar
+rora sig +-7,8 % och Astra +-2,6 % pa rapportdagen ar ett faktum, och det ar
+den siffra som avgor hur mycket du riskerar om du sitter med over rapporten.
+Kor om testet sjalv:
+
+    python I:\Claudecode\borscase\rapportkalender.py
+
+
+GRUPPERNA - SOXX FOR SIG SJALVT
+-------------------------------
+Universumet ar delat i tva grupper, och percentilerna raknas INOM gruppen:
+
+  karna            145 bolag - svenska storbolag + amerikanska large cap
+  halvledare_ai     72 bolag - SOXX-korgen + AI-infrastruktur och AI-mjukvara
+
+Uppdelningen ar statistisk, inte kosmetisk. Ett halvledarbolag jamfort med
+Axfood far alltid usel varderingspercentil - inte for att det ar dyrt for att
+vara halvledarbolag, utan for att cykliska tillvaxtbolag alltid vardera hogre
+an dagligvaror. Blandas de mater poangen bransch i stallet for bolag.
+
+Valj grupp i rullgardinen "Grupp" hogst upp i Jakt-fliken. Vill du slippa
+halvledarna helt i sjalva skanningen, satt i installningar.json:
+
+  "grupper": ["karna"]
+
+Eller kor fran terminalen:
+
+    python I:\Claudecode\borscase\skanning.py --karna
+    python I:\Claudecode\borscase\skanning.py --ai
+
+
+SVENSKA RAPPORTER LASES NU OCKSA
+--------------------------------
+Sverige har ingen motsvarighet till SEC EDGAR. Men rapporterna maste
+offentliggoras via en godkand distributor, och MFN.se publicerar dem med ett
+oppet JSON-flode dar hela delarsrapporten ligger som PDF-bilaga. Appen hamtar
+den, laser den med pypdf och kor exakt samma analys som pa de amerikanska.
+
+Tre skillnader att kanna till:
+
+  * En svensk delarsrapport ar 20-50 sidor, en 10-K ar 100-200 och har ett
+    LAGSTADGAT riskavsnitt. Sprakforandringsmattet blir darfor trubbigare.
+  * Jamforelsen gors mot SAMMA KVARTAL foregaende ar, aldrig mot forra
+    kvartalet - Q2 skrivs alltid annorlunda an Q4.
+  * Bara mot samma SPRAK. En engelsk Q2 jamford med fjolarets svenska Q2 ger
+    cosinuslikhet 0,06 och larmet "kraftigt omskriven" nar ingenting alls har
+    skrivits om. Ligger likheten under 0,30 sager appen "EJ JAMFORBARA" i
+    stallet for att larma.
+
+Svenska roda flaggor finns ocksa, dar kontrollbalansrakning ar den allvarligaste
+och saknar engelsk motsvarighet: det egna kapitalet har gatt under halva
+aktiekapitalet, och da aterstar atta manader innan bolaget ska likvideras.
+
+Alla 61 svenska bolag far nu sin rapport last.
+
+
+RAPPORTLASNINGEN - DET SOM SKILJER FRAN EN VANLIG SCREENER
+-----------------------------------------------------------
+For amerikanska bolag hamtas arsredovisningen (10-K) i fulltext direkt fran
+SEC och fyra saker mats:
+
+  1. SPRAKFORANDRING. Hur mycket har bolaget skrivit om riskavsnittet sedan
+     i fjol? Matt som cosinuslikhet. Cohen, Malloy & Nguyen (Journal of
+     Finance 2020, "Lazy Prices") visade att bolag som andrade mest i sin
+     text gav samst avkastning aret efter. Intel ligger till exempel pa 0,60
+     - kraftigt omskrivet. Apple pa 0,99 - i princip samma text som i fjol.
+
+  2. TONLAGE. Andel negativa ord, osakerhetsord, tvistord och
+     begransningsord, med Loughran & McDonalds finansanpassade lexikon
+     (2011) - inte ett vanligt sentimentlexikon som tror att "liability" och
+     "cost" ar negativa ord. Las det som en trend for samma bolag over tid.
+
+  3. RODA FLAGGOR. Ordagranna formuleringar som betyder nagot exakt:
+     "substantial doubt about our ability to continue as a going concern",
+     "material weakness in internal control", "restatement of financial
+     statements", "violation of covenants". De star aldrig dar av misstag.
+     Appen visar citatet sa du kan lasa det i sitt sammanhang.
+
+  4. NYA RISKER. Vilka riskstycken som inte fanns i fjolarets rapport. Det
+     ar bolagets egen juridiska bekannelse om vad som forandrats, och ofta
+     det mest informativa i hela arsredovisningen.
+
+En detalj som ar viktigare an den later: flaggorna kraver att nagot FAKTISKT
+hant, inte att det namns som mojlighet. Varenda 10-K innehaller meningen
+"management concluded that our internal control was effective and no material
+weakness was identified", och varenda revisionsberattelse innehaller
+"assessing the risk that a material weakness exists". En flagga som tands for
+alla sager ingenting om nagon. Darfor har varje monster ett negationsfilter.
+Resultatet: Boeing och Pfizer ar rena fran de har flaggorna, medan Intel och
+Lumen tander flera.
+
+For SVENSKA bolag finns ingen motsvarande oppen databas. Dar far du peka ut
+rapporten sjalv: fliken Rapport -> "Las en egen rapport", klistra in lanken
+till arsredovisningen (helst den engelska versionen, lexikonet ar engelskt)
+eller texten direkt. Ange garna fjolarets rapport ocksa sa mats
+sprakforandringen pa exakt samma satt.
+
+
+VARFOR AMERIKANSKA BOLAG FAR DJUPARE ANALYS
+--------------------------------------------
+SEC:s XBRL-api levererar varje rapporterad siffra tillsammans med DATUMET
+DA DEN BLEV OFFENTLIG. Det later trakigt men ar helt avgorande: det ar det
+enda sattet att gora ett arligt historiskt test. Utan filing-datum "vet"
+testet bokslutet innan det fanns, och da ser vilken modell som helst
+lysande ut.
+
+Svenska bolag har bara 4-5 ars bokslut via Yahoo, utan publiceringsdatum.
+De ar darfor med i skanningen men INTE i valideringen. Det ar en arlig
+begransning, inte en bugg.
+
+
+BEGRANSNINGAR SOM DU SKA KANNA TILL
+------------------------------------
+* Overlevnadsbias. Universumet ar de bolag som finns idag. Bolag som gick
+  under finns inte med. Det gor ALLA historiska siffror for snalla.
+* Yahoo Finance ar ett inofficiellt granssnitt utan garantier. Kontrollera
+  alltid en siffra som ska ligga till grund for ett beslut mot bolagets
+  egen rapport.
+* Banker, fastighetsbolag och investmentbolag far fardre matt. Foretagsvarde,
+  nettoskuld och kassaflode efter investeringar betyder nagot HELT annat
+  dar. Appen stanger av de matten i stallet for att rakna fel, och visar
+  lagre "tackning" - las den siffran tillsammans med poangen.
+* Courtage, vaxlingsavgift, spread och skatt ingar inte nagonstans.
+* Lexikonen ar delmangder av Loughran-McDonalds listor, inte hela.
+
+
+BORJA HAR OM DU ALDRIG GJORT DET HAR FORUT
+------------------------------------------
+Oppna appen och ga till fliken HJALP langst till hoger. Dar star:
+
+  * Arbetsgangen i sju steg, fran skanning till vad du ska anteckna.
+  * En ordlista med 55 uppslagsord dar varje finansord forklaras fran grunden -
+    vad Altman Z ar, vad soliditet betyder, varfor ett negativt P/E inte ar
+    billigt, vad utspadning gor med din andel. Varje ord har ocksa en
+    tolkningstabell (vad ar hogt, vad ar lagt) och de vanligaste fallgroparna.
+  * Sokruta: skriv "altman" eller "soliditet" sa filtreras listan direkt.
+
+Du behover inte kunna nagot i forvag. Bocka av de sju stegen sa gar resten av
+sig sjalvt.
+
+
+INSYN-FLIKEN - VAD DE SOM VET MEST GOR MED SINA EGNA PENGAR
+-----------------------------------------------------------
+Personer i ledande stallning maste anmala varje kop och forsaljning i sitt eget
+bolag. Sverige: Finansinspektionens insynsregister (hela marknaden i EN fil).
+USA: SEC Form 4. Sex manader bakat, 151 bolag med anmald handel.
+
+TESTAD - OCH DEN FOLL. Insynskop har i flera studier foljts av battre avkastning
+(Lakonishok & Lee 2001; Jeng, Metrick & Zeckhauser 2003). Men pa vara 55 svenska
+bolag, 1342 observationer 2020-2026:
+
+  Nettokopare          +7,1 %  pa sex manader
+  Nettosaljare         +8,1 %
+  Ingen insynshandel   +7,7 %
+  Alla bolag           +7,5 %
+  p mot slumpen         0,747
+
+Nettokoparna gick alltsa 0,4 procentenheter SAMRE an snittet. Kor om det sjalv:
+python testa_insyn.py
+
+DET HAR AR DET NIONDE TESTET SOM FALLER, och det larorikaste av dem. Forsta
+korningen visade +5,8 procentenheter med p = 0,003 - alltsa ett tydligt
+"insynskop fungerar". Det var fel, och orsaken var en bugg i MIN kod: nar ett
+anrop till FI misslyckades cachades det tomma svaret i fem ar. 102 av 125
+tidsfonster lag kvar som tomma, fyra hela ar saknades, och pa det trasiga
+underlaget sag signalen ut att fungera med statistisk sakerhet.
+
+Larddomen: ett signifikant resultat ar inte ett bevis pa att signalen finns.
+Det ar lika ofta ett bevis pa att datan ar trasig. Kolla alltid tackningen
+innan du tror pa ett p-varde.
+
+Tre saker sorteras bort, och utan dem vore listan varldelos:
+
+  AKTIEPROGRAM   Tilldelningar, optionslosen och forsaljningar for att betala
+                 skatten pa dem. Det ar LON, inte overtygelse. I USA innebar
+                 det bara transaktionskod P (kop) och S (salj) raknas - A och
+                 M ar ersattning.
+  FEL INSTRUMENT Teckningsoptioner, swappar och obligationer, dar kolumnerna
+                 Volym och Pris betyder nagot helt annat. En Swedbank-post lag
+                 pa "volym 200 000 000 a 200 000 000" - det ar ett obligations-
+                 lan, inte ett insynskop for 200 miljoner.
+  STORAGARE      Transaktioner over 50 miljoner redovisas separat. Tele2 lag pa
+                 5,4 MILJARDER fran en enda post, och det var Iliad som okade
+                 sin agarandel - inte vd:ns privatekonomi.
+
+Efter filtreringen aterstar det som faktiskt betyder nagot. Just nu:
+
+  Intels vd Lip-Bu Tan kopte for 10 mn dollar den 11 augusti.
+  Pfizers vd Albert Bourla kopte.
+  Securitas vd Magnus Ahlqvist och ordforande Jan Svensson kopte bada.
+  Munters: 11 kop av 8 olika personer.
+
+Och at andra hallet: CoreWeave 251 forsaljningar, Arista Networks 256.
+
+Insynskop av ledningen visas ocksa direkt i rad-kortet under bolaget, markerat
+med INSYN.
+
+
+OMSKRIVET-FLIKEN
+----------------
+Alla 195 bolag rangordnade efter hur mycket de skrivit om sin rapporttext sedan
+forra jamforbara rapporten. 1,000 = ordagrant samma text.
+
+Tre saker gors som ar lattare att missa an att gora fel:
+
+  RANGORDNING INOM MARKNADEN. Medianlikheten ar 0,990 for amerikanska bolag och
+  0,936 for svenska. Skillnaden ar inte att svenskar andrar mer - en svensk
+  delarsrapport ar 20-50 sidor och varierar naturligt, en amerikansk 10-K ar
+  200 sidor mall. Rakt jamfort hade alla svenska bolag hamnat overst utan att
+  nagot hant.
+
+  UTESLUTNA MATFEL. Likhet under 0,30 betyder inte omskrivning utan att
+  texterna inte gar att jamfora - olika sprak mellan aren, eller en PDF som
+  inte gick att lasa. Fyra bolag ligger dar och redovisas separat.
+
+  RENSAT FRAN BRUS. Riskavsnittet maste faktiskt se ut som ett riskavsnitt
+  (andel riskord och siffertathet kontrolleras), annars anvands hela rapporten
+  i stallet. Och ledningsbiografier raknas inte som nya riskstycken - Oracle
+  bytte finanschef och hamnade darfor overst i listan pa ren automatik tills
+  det filtret kom pa plats.
+
+OCH DET VIKTIGASTE: signalen ar testad i den har appen och den foll. Topp minus
+botten -5,0 procentenheter, p = 0,757, 750 observationer. En kraftigt omskriven
+rapport ar alltsa INGEN saljsignal. Anvand listan som en LASLISTA - bolagen har
+sjalva bedomt att nagot forandrats sa pass att texten behovde skrivas om, och
+da ar det vart att lasa VAD.
+
+
+DET SVARTA FONSTRET SOM OPPNAS
+------------------------------
+STARTA_APP.bat oppnar ett svart fonster med text i. Det ar sjalva servern - den
+maste vara oppen sa lange du anvander appen. Stanger du den slutar sidan
+fungera. Sa har ska det se ut:
+
+    Borscase v1.11  (2026-08-20)
+    Adress:     http://127.0.0.1:8810
+    Data:       2026-08-20 15:10, 216 bolag
+    Mapp:       I:\Claudecode\borscase
+
+Kor du en aldre version star det i stallet en rod text: "WARNING: This is a
+development server. Do not use it in a production deployment." Den ar OFARLIG.
+Flask skriver ut den varje gang och menar servrar som ligger oppna pa internet
+for tusentals besokare. Den har lyssnar bara pa 127.0.0.1 - din egen dator -
+och har en enda anvandare. Fran v1.11 ar varningen borttagen, for rod text som
+inte betyder nagot lar bara ogat att strunta i rod text som gor det.
+
+Raderna som dok upp lopande, typ
+
+    127.0.0.1 - - [24/Aug/2026 07:29:55] "GET / HTTP/1.1" 200 -
+
+var webblasaren som hamtade en sida. 200 betyder att det gick bra. De ar ocksa
+borttagna nu - de sa samma sak femton ganger i rad.
+
+
+PRESENTATION OCH STOD
+---------------------
+En fardig presentation finns pa http://127.0.0.1:8810/presentation nar appen
+kor, eller genom att oppna presentation.html direkt. Atta bilder, gjord for att
+spelas in: piltangenter eller mellanslag byter bild, och pa bilden om vandningen
+kraver forsta klicket att den roda siffran avslojas - hela poangen ar att
+tittaren hinner tro pa den grona forst.
+
+Appen ar gratis och forblir det. Ingen inloggning, inga API-nycklar, inga
+funktioner bakom betalvagg. Kaffeknappen i sidhuvudet och stodavsnittet i
+Hjalp-fliken gar till Buy Me a Coffee. En donation ar en gava, inte ett kop -
+den ger inga extra funktioner och andrar ingenting i vad appen visar. Skulle
+den gora det vore appen inte vard att lita pa.
+
+Byt lankarna i installningar.json om du vill ha andra:
+
+  "stod_bmac":   "https://buymeacoffee.com/DittNamn"
+  "stod_paypal": "https://paypal.me/dittnamn"
+
+
+VILKEN VERSION KOR JAG?
+-----------------------
+Star hogst upp i appen, direkt efter namnet:
+
+    Borscase  v1.9 - data 2026-08-19 07:39 - 216 bolag
+
+  VERSIONSNUMRET   vilket PROGRAM du kor. Jamfor med numret pa den andra
+                   datorn om du undrar om nagon kor en gammal kopia.
+  DATA-DATUMET     hur farska SIFFRORNA ar. Gront = under en vecka gammalt,
+                   gult = under en manad, rott = aldre. Aldern star utskriven
+                   i dagar sa fort skanningen inte ar fran idag.
+  ANTAL BOLAG      hur manga som fanns med i den skanningen.
+
+Klicka pa raden sa oppnas hela versionshistoriken i Hjalp-fliken, med vad som
+andrats i varje version. Muspekaren over raden visar vilken MAPP appen kors ur
+- anvandbart nar man har flera kopior.
+
+Zip-filerna heter numera borscase-v1.9-2026-08-19.zip, sa versionen syns utan
+att man packar upp dem.
+
+VANLIGASTE ORSAKEN till att man tror sig kora fel version: webblasaren visar
+en cachad sida. Tryck Ctrl+F5 sa laddas allt om fran servern.
+
+
+FLIKARNA
+--------
+JAKT        Traffelistan. Filtrera pa marknad, bransch, tackning och
+            varningar. Byt profil (Sammansatt / Kvalitet / Varde) - det
+            viktar om direkt utan att hamta data pa nytt. Klicka pa en rad.
+CASE        Djupdykningen: tes, pelare, nyckeltal, det som talar for och
+            emot, varningar, bokslut 10-19 ar bakat, kurs, och rapporten.
+            Har finns ocksa "VAD SOM SKULLE GORA CASET FEL" - konkreta
+            matbara villkor. Skriv upp dem och kolla vid varje kvartal. Ett
+            case man inte kan motbevisa ar inte ett case, det ar en
+            forhoppning.
+RAPPORT     Rapportlasningen, och verktyget for egna rapporter.
+VALIDERING  Testet ovan, med nollkontroll. Las den fliken.
+OMSKRIVET   Alla bolag rangordnade efter hur mycket rapporttexten andrats.
+INSYN       Insynshandel: vad ledningen gor med sina egna pengar.
+IDAG        Dagens besked i tre hogar: undvik, las forst, inget hindrar.
+METOD       Varje matt, dess riktning, dess vikt och dess kalla.
+HJALP       Arbetsgangen steg for steg + ordlista over alla begrepp.
+
+
+GRANSKA MIG
+-----------
+    python I:\Claudecode\borscase\skanning.py            skanna
+    python I:\Claudecode\borscase\skanning.py kvalitet   annan profil
+    python I:\Claudecode\borscase\validering.py          testa modellen
+    python I:\Claudecode\borscase\validering.py --rapporter
+                                       samma test MED rapportsignalerna
+                                       (laddar ner ca 800 arsredovisningar
+                                        forsta gangen - lang korning)
+
+OBS: Windows PowerShell 5.1 stodjer inte "&&". Kor med full sokvag sa
+slipper du "cd" helt.
+
+Alla siffror gar att reproducera. Lita inte pa dem - kor dem.
+
+
+FILERNA
+-------
+  app.py             webbservern och API:et
+  dashboard.html     hela granssnittet
+  universum.py       vilka bolag som jagas
+  datakallor.py      SEC EDGAR + Yahoo, och cachen
+  fundamenta.py      gor tva rapportvarldar till en tabell
+  matt.py            alla nyckeltal, med kallhanvisning i varje docstring
+  rapportlasning.py  sprakforandring, tonlage, roda flaggor, nya risker
+  case.py            fran nyckeltal till case - och till dess motbevis
+  skanning.py        motorn som gar igenom hela universumet
+  validering.py      det arliga testet med nollkontroll
+
+  installningar.json     din profil och dina egna bolag
+  skanning_resultat.json senaste skanningen
+  validering_resultat.json senaste valideringen
+  cache/                 all hamtad data
+
+
+INSTALLNINGAR
+-------------
+installningar.json skapas automatiskt forsta gangen du kor SKANNA.bat eller
+STARTA_APP.bat. Faltet "sec_kontakt" bor du fylla i sjalv:
+
+  "sec_kontakt": "Borscase privat verktyg din.adress@example.com"
+
+SEC ber om en identifierbar avsandare i varje anrop. Det ar deras uttryckliga
+onskemal, inte ett tekniskt krav - appen fungerar utan - men adressen du
+skriver dar skickas med till SEC vid varje hamtning. Vill du vara anonym,
+lamna faltet tomt sa anvands platshallaren.
+
+Ovriga falt: "profil" (sammansatt/kvalitet/varde), "las_rapporter" (satt
+false om du bara vill ha siffrorna och slippa nedladdningen), "rapportdjup"
+(hur manga arsredovisningar bakat som lases per bolag).
+
+
+LAGGA TILL EGNA BOLAG
+---------------------
+Oppna installningar.json och fyll i:
+
+  "egna_bolag": {
+    "SWED-A.ST": {"namn": "Swedbank A", "bransch": "Bank"},
+    "PLTR":      {"namn": "Palantir", "bransch": "Teknik", "edgar": true}
+  }
+
+Yahoo-symbolen ar den som star i adressen pa finance.yahoo.com. Svenska
+aktier slutar pa .ST. Satt "edgar": true for amerikanska bolag sa lases
+rapporterna ocksa.
+
+
+FRISKRIVNING
+------------
+Detta ar ett rakneverktyg, inte finansiell radgivning. Historisk avkastning
+ar ingen garanti for framtiden. Data kan vara fel. Enskilda aktier ar
+betydligt mer riskfyllda an en bred fond och kan forlora hela sitt varde.
+Alla beslut ar dina egna.

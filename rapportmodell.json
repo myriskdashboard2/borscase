@@ -1,0 +1,11 @@
+{
+ "antal_rapporter": 5085,
+ "antal_bolag": 209,
+ "traffsakerhet": 0.5081612586037365,
+ "alltid_upp_traffsakerhet": 0.5085545722713865,
+ "battre_an_alltid_upp": false,
+ "z": 1.1639454146222947,
+ "p_varde": 0.12222306672972733,
+ "slutsats": "Metoden träffade 50.8 % av riktningarna. Att alltid gissa upp hade gett 50.9 %. p = 0.122 mot slantsingling. Sannolikheten som visas i appen ska därför läsas som vad den är: en historisk andel, inte en prognos. Det som ÄR användbart på den här fliken är hur STORT bolaget brukar röra sig — den siffran säger vad du riskerar över rapportdagen.",
+ "tid": "2026-08-13T11:48:10+02:00"
+}

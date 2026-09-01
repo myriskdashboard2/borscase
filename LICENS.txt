@@ -1,0 +1,49 @@
+BORSCASE — LICENS
+Copyright (c) 2026 Michael Johnlin. Med ensamrätt.
+
+Det här är källkodstillgänglig programvara, inte öppen källkod. Du får läsa
+koden och köra den, men du får inte sälja den eller ge ut den som din egen.
+
+
+DU FÅR
+
+  * Ladda ner, köra och ändra programmet för PRIVAT, ICKE-KOMMERSIELLT bruk.
+  * Läsa och studera hela källkoden — det är själva poängen med att den ligger
+    öppet. Ett räkneverktyg vars uträkningar man inte kan granska är värdelöst.
+  * Dela en oförändrad kopia med enskilda personer, med den här filen kvar.
+
+
+DU FÅR INTE
+
+  * Sälja programmet, ta betalt för åtkomst till det, eller använda det i en
+    kommersiell tjänst.
+  * Sprida det vidare som ditt eget verk eller under annan licens.
+  * Sprida DATA som programmet hämtat. Kursdata, bokslut, rapporttext och
+    insynstransaktioner tillhör sina respektive källor, inte den här licensen.
+    Varje användare hämtar sin egen data.
+
+
+INGEN GARANTI
+
+Programmet levereras i befintligt skick, utan garantier av något slag,
+varken uttryckliga eller underförstådda. Upphovsmannen ansvarar inte för
+någon skada, förlust eller utebliven vinst som följer av att programmet
+används — oavsett om skadan orsakats av fel i programmet, fel i hämtad data,
+eller av beslut som fattats med programmet som underlag.
+
+
+INTE FINANSIELL RÅDGIVNING
+
+Programmet är ett räkneverktyg. Det utgör inte investeringsrådgivning och är
+inte en rekommendation att köpa eller sälja något finansiellt instrument.
+Historisk avkastning är ingen garanti för framtiden. Enskilda aktier kan
+förlora hela sitt värde. Alla investeringsbeslut är dina egna.
+
+Programmets egna tester visar dessutom att dess rangordning INTE har kunnat
+förutsäga avkastning — se fliken Validering. Läs den innan du använder något
+av det programmet visar som underlag för ett beslut.
+
+
+OM DU VILL ANVÄNDA DET TILL NÅGOT ANNAT
+
+Kontakta upphovsmannen. Andra villkor kan avtalas.

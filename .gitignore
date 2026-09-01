@@ -1,0 +1,35 @@
+# ============================================================================
+#  Vad som ALDRIG far hamna pa GitHub, och varfor.
+#  Utan de har raderna publicerar du andras data i ditt eget namn.
+# ============================================================================
+
+# Hamtad data. Kursdata och bokslut fran Yahoo far enligt deras villkor inte
+# spridas vidare. Rapporttexterna tillhor bolagen. Insynsregistret innehaller
+# NAMNGIVNA PERSONER - att publicera ett eget dataset med deras affarer ar en
+# egen behandling av personuppgifter, och da ar GDPR ditt ansvar.
+cache/
+skanning_resultat.json
+
+# Dina egna installningar: SEC-kontaktadress och ditt kapital.
+installningar.json
+
+# Loggar och skrap
+app.pid
+*.log
+*.tmp
+__pycache__/
+*.pyc
+start_prov.txt
+*_logg.txt
+
+# Zip-paket
+*.zip
+
+# ============================================================================
+#  Det som DAREMOT far folja med, och bor gora det:
+#
+#    validering_*.json     Bara aggregerad statistik. Inga bolagsnamn, inga
+#    valideringstavla.json kurser, inga personer. Det ar bevisen for att
+#    rapportmodell.json    modellen inte fungerar, och de ar hela poangen -
+#    insynsmodell.json     utan dem ser appen ut att lova nagot den inte kan.
+# ============================================================================

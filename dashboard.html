@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Börscase</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#151b23; --panel2:#1b232d; --linje:#273040;
+  --text:#e6edf3; --svag:#8b98a8; --svagare:#5d6b7d;
+  --gron:#3fb950; --gul:#d29922; --rod:#f85149; --bla:#58a6ff; --lila:#bc8cff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:14px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--bla)}
+h1,h2,h3{margin:0 0 .5em;font-weight:600;letter-spacing:-.01em}
+h1{font-size:20px} h2{font-size:17px} h3{font-size:14px}
+header{background:var(--panel);border-bottom:1px solid var(--linje);
+  padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:20}
+.logo{font-weight:700;font-size:17px;letter-spacing:-.02em}
+.logo span{color:var(--svagare);font-weight:400;font-size:12px;margin-left:8px}
+.flikar{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.flik{padding:7px 14px;border-radius:6px;cursor:pointer;color:var(--svag);
+  border:1px solid transparent;font-size:13px;user-select:none}
+.flik:hover{color:var(--text);background:var(--panel2)}
+.flik.pa{background:var(--panel2);color:var(--text);border-color:var(--linje)}
+main{padding:20px;max-width:1500px;margin:0 auto}
+.sida{display:none} .sida.pa{display:block}
+.kort{background:var(--panel);border:1px solid var(--linje);border-radius:10px;
+  padding:16px;margin-bottom:16px}
+.rad{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:12px}
+button{background:var(--panel2);color:var(--text);border:1px solid var(--linje);
+  padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit}
+button:hover{border-color:var(--bla);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primar{background:#1f6feb;border-color:#1f6feb;color:#fff}
+button.primar:hover{background:#388bfd}
+select,input,textarea{background:var(--bg);color:var(--text);border:1px solid var(--linje);
+  padding:6px 9px;border-radius:6px;font-size:13px;font-family:inherit}
+textarea{width:100%;min-height:90px;resize:vertical}
+label{font-size:12px;color:var(--svag)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--svag);font-weight:500;padding:7px 8px;
+  border-bottom:1px solid var(--linje);white-space:nowrap;font-size:12px}
+th.sorterbar{cursor:pointer;user-select:none}
+th.sorterbar:hover{color:var(--text)}
+td{padding:7px 8px;border-bottom:1px solid #1c232d;vertical-align:middle}
+tr.klickbar{cursor:pointer}
+tr.klickbar:hover td{background:var(--panel2)}
+.h{text-align:right;font-variant-numeric:tabular-nums}
+.svag{color:var(--svag)} .liten{font-size:12px} .minsta{font-size:11px}
+.gron{color:var(--gron)} .rod{color:var(--rod)} .gul{color:var(--gul)} .bla{color:var(--bla)}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;
+  border:1px solid var(--linje);background:var(--panel2);color:var(--svag);white-space:nowrap}
+.pill.varn{border-color:#5a3a1a;background:#2a1e10;color:var(--gul)}
+.pill.fara{border-color:#5c2626;background:#2a1414;color:var(--rod)}
+.pill.bra{border-color:#1d4429;background:#10240f;color:var(--gron)}
+.matare{height:6px;background:#0b1017;border-radius:3px;overflow:hidden;min-width:54px}
+.matare i{display:block;height:100%;border-radius:3px}
+.poang{font-variant-numeric:tabular-nums;font-weight:600}
+.bevis{border-left:2px solid var(--gron);padding:6px 0 6px 12px;margin-bottom:8px}
+.bevis.mot{border-left-color:var(--rod)}
+.bevis b{font-variant-numeric:tabular-nums}
+.varnkort{border:1px solid #5a3a1a;background:#1d1509;border-radius:8px;padding:10px 12px;
+  margin-bottom:8px}
+.varnkort.fara{border-color:#5c2626;background:#1d0f0f}
+.falsi{background:var(--panel2);border-radius:8px;padding:10px 12px;margin-bottom:8px;
+  border-left:3px solid var(--lila)}
+.citat{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--svag);
+  background:#0b1017;padding:8px 10px;border-radius:6px;margin-top:6px;
+  max-height:120px;overflow:auto;white-space:pre-wrap}
+.status{font-size:12px;color:var(--svag);min-height:18px}
+.tom{color:var(--svagare);padding:40px;text-align:center}
+.nyckel{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px}
+.nyckel div:nth-child(odd){color:var(--svag)}
+.nyckel div:nth-child(even){text-align:right;font-variant-numeric:tabular-nums}
+.pelarrad{display:grid;grid-template-columns:130px 1fr 44px;gap:8px;align-items:center;
+  margin-bottom:5px;font-size:12px}
+.info{background:#101a26;border:1px solid #1d3350;border-radius:8px;padding:10px 12px;
+  font-size:12.5px;color:#9fb6d0;margin-bottom:12px}
+.varning-ruta{background:#1d1509;border:1px solid #5a3a1a;border-radius:8px;padding:10px 12px;
+  font-size:12.5px;color:#d9b877;margin-bottom:12px}
+.tva{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tre{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1000px){.tva,.tre{grid-template-columns:1fr}}
+.modalbg{position:fixed;inset:0;background:#000a;display:none;z-index:50;
+  align-items:center;justify-content:center;padding:20px}
+.modalbg.pa{display:flex}
+.modal{background:var(--panel);border:1px solid var(--linje);border-radius:12px;
+  max-width:700px;padding:22px;max-height:85vh;overflow:auto}
+code{background:#0b1017;padding:1px 5px;border-radius:4px;font-size:12px}
+.spinn{display:inline-block;width:11px;height:11px;border:2px solid var(--linje);
+  border-top-color:var(--bla);border-radius:50%;animation:sn .7s linear infinite;
+  vertical-align:-1px;margin-right:6px}
+@keyframes sn{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Börscase<span id="versionslapp">läser in…</span></div>
+  <div class="flikar" id="flikar"></div>
+  <a id="stodlank" href="#" target="_blank" rel="noopener"
+     style="display:none;padding:6px 12px;border-radius:6px;background:#2a2113;
+            border:1px solid #5a3a1a;color:#ffdd7a;text-decoration:none;font-size:13px;
+            white-space:nowrap">☕ Bjud på en kaffe</a>
+</header>
+
+<main>
+
+<!-- ════════════════════════════ IDAG ════════════════════════════ -->
+<div class="sida pa" id="sida-idag">
+  <div class="kort">
+    <div class="rad" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <h1>Vad du bör göra</h1>
+        <div class="svag liten">Appen ger besked. Underlaget står under varje rad.</div>
+      </div>
+      <div><label>Kapital avsatt för enskilda aktier</label><br>
+        <input id="kapital" type="number" step="10000" style="width:150px"> kr
+        <button id="spara-kapital">Spara</button></div>
+    </div>
+  </div>
+  <div id="idag-innehall"><div class="tom">Laddar…</div></div>
+</div>
+
+<!-- ══════════════════════════════ JAKT ══════════════════════════════ -->
+<div class="sida" id="sida-jakt">
+  <div class="kort">
+    <div class="rad">
+      <div><label>Profil</label><br>
+        <select id="profil">
+          <option value="sammansatt">Sammansatt — allt vägs</option>
+          <option value="kvalitet">Kvalitet — bra bolag först</option>
+          <option value="varde">Värde — lågt pris först</option>
+        </select></div>
+      <div><label>Grupp</label><br>
+        <select id="f-grupp"><option value="">alla</option>
+          <option value="karna">Kärna (utan halvledare/AI)</option>
+          <option value="halvledare_ai">Halvledare &amp; AI (SOXX m.m.)</option></select></div>
+      <div><label>Marknad</label><br>
+        <select id="f-marknad"><option value="">alla</option>
+          <option>Sverige</option><option>USA</option></select></div>
+      <div><label>Bransch</label><br><select id="f-bransch"><option value="">alla</option></select></div>
+      <div><label>Minsta täckning</label><br>
+        <select id="f-tackning">
+          <option value="0">alla</option><option value="0.6">60 %</option>
+          <option value="0.8" selected>80 %</option><option value="1">100 %</option>
+        </select></div>
+      <div><label>Varningar</label><br>
+        <select id="f-varning"><option value="alla">visa alla</option>
+          <option value="utan">bara utan varning</option>
+          <option value="med">bara med varning</option></select></div>
+      <div><label>Bara med läst rapport</label><br>
+        <select id="f-rapport"><option value="alla">nej</option><option value="ja">ja</option></select></div>
+      <div style="margin-left:auto;align-self:flex-end">
+        <button class="primar" id="knapp-skanna">Kör ny skanning</button>
+      </div>
+    </div>
+    <div class="status" id="status-jakt" style="margin-top:10px"></div>
+  </div>
+
+  <div class="kort" style="padding:0;overflow:auto">
+    <table id="tabell">
+      <thead><tr>
+        <th style="width:28px"></th>
+        <th class="sorterbar" data-s="namn">Bolag</th>
+        <th>Bransch</th>
+        <th class="sorterbar h" data-s="poang">Poäng</th>
+        <th class="h" style="width:90px">Fördelning</th>
+        <th class="sorterbar h" data-s="Kvalitet">Kval</th>
+        <th class="sorterbar h" data-s="Värdering">Värd</th>
+        <th class="sorterbar h" data-s="Finansiell styrka">Fin</th>
+        <th class="sorterbar h" data-s="Tillväxt">Tillv</th>
+        <th class="sorterbar h" data-s="Marknad">Mark</th>
+        <th class="sorterbar h" data-s="Rapportsignaler">Rapp</th>
+        <th class="sorterbar h" data-s="rapport">Rapport</th>
+        <th class="sorterbar h" data-s="tackning">Täck</th>
+        <th>Varningar</th>
+      </tr></thead>
+      <tbody id="tbody"><tr><td colspan="13" class="tom">Ingen skanning ännu.
+        Tryck <b>Kör ny skanning</b> — första gången tar några minuter.</td></tr></tbody>
+    </table>
+  </div>
+  <div class="liten svag" id="jakt-fot"></div>
+</div>
+
+<!-- ══════════════════════════════ CASE ══════════════════════════════ -->
+<div class="sida" id="sida-case">
+  <div class="kort">
+    <div class="rad">
+      <div><label>Bolag</label><br><select id="case-val" style="min-width:260px"></select></div>
+      <div style="align-self:flex-end"><button id="knapp-case">Hämta färska siffror</button></div>
+      <div class="status" id="status-case" style="margin-left:12px"></div>
+    </div>
+  </div>
+  <div id="case-innehall"><div class="tom">Välj ett bolag, eller klicka på en rad i Jakt.</div></div>
+</div>
+
+<!-- ═════════════════════════════ RAPPORT ════════════════════════════ -->
+<div class="sida" id="sida-rapport">
+  <div class="info">
+    Rapportläsningen mäter fyra saker: hur mycket texten skrivits om jämfört med i fjol
+    (<b>Lazy Prices</b>, Cohen–Malloy–Nguyen 2020), tonläget med finansanpassat lexikon
+    (<b>Loughran–McDonald</b> 2011), ordagranna röda flaggor, och vilka riskstycken som är
+    nya i år. <b>Amerikanska bolag</b> hämtas som 10-K från SEC. <b>Svenska bolag</b> hämtas
+    som delårsrapport i PDF från MFN och jämförs mot <b>samma kvartal föregående år</b> —
+    aldrig mot förra kvartalet, för Q2 skrivs alltid annorlunda än Q4.
+  </div>
+  <div class="kort">
+    <div class="rad">
+      <div><label>Bolag</label><br><select id="rap-val" style="min-width:260px"></select></div>
+      <div><label>Antal årsredovisningar bakåt</label><br>
+        <select id="rap-djup"><option>2</option><option selected>3</option>
+          <option>5</option><option>8</option></select></div>
+      <div style="align-self:flex-end"><button class="primar" id="knapp-rapport">Läs rapporterna</button></div>
+      <div class="status" id="status-rapport" style="margin-left:12px"></div>
+    </div>
+  </div>
+  <div id="rapport-innehall"></div>
+
+  <div class="kort">
+    <h2>Läs en egen rapport</h2>
+    <p class="liten svag">De 217 bolagen i universumet läses automatiskt ovan. Det här är för
+      bolag som INTE finns med: klistra in länken till rapporten eller texten direkt. Ange gärna
+      förra årets rapport också, så mäts språkförändringen på samma sätt. Tänk på att jämföra
+      samma period och samma språk — annars mäter du säsong eller ordbok i stället för
+      förändring.</p>
+    <div class="tva">
+      <div>
+        <label>Senaste rapporten — URL eller filsökväg</label>
+        <input id="egen-kalla" style="width:100%" placeholder="https://... eller C:\...\arsredovisning.pdf">
+        <label style="margin-top:8px;display:block">…eller klistra in texten</label>
+        <textarea id="egen-text"></textarea>
+      </div>
+      <div>
+        <label>Förra årets rapport (frivillig)</label>
+        <input id="egen-kalla2" style="width:100%" placeholder="https://...">
+        <label style="margin-top:8px;display:block">…eller klistra in texten</label>
+        <textarea id="egen-text2"></textarea>
+      </div>
+    </div>
+    <div class="rad" style="margin-top:10px">
+      <button class="primar" id="knapp-egen">Analysera</button>
+      <span class="status" id="status-egen"></span>
+    </div>
+    <div id="egen-innehall"></div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════ INSYN ═════════════════════════════ -->
+<div class="sida" id="sida-insyn">
+  <div class="kort">
+    <h1>Vad de som vet mest gör med sina egna pengar</h1>
+    <p style="max-width:88ch">Personer i ledande ställning måste anmäla varje köp och
+      försäljning i sitt eget bolag. Sverige: Finansinspektionens insynsregister.
+      USA: SEC Form 4. Sex månader bakåt.</p>
+    <div class="info" style="margin-top:12px">
+      <b>Testad i den här appen — och den föll.</b> Insynsköp har i flera studier följts av
+      bättre avkastning (Lakonishok &amp; Lee 2001; Jeng, Metrick &amp; Zeckhauser 2003), men
+      på våra 55 svenska bolag och 1342 observationer 2020–2026 gav nettoköpare
+      <b>+7,1 %</b> på sex månader mot <b>+7,5 %</b> för alla bolag. Säljarna gick bäst av
+      alla (+8,1 %). p mot slumpen = 0,747.
+      <br><br>Använd fliken för att se <b>vad ledningen gör</b> — det är hård, officiell
+      information och värd att känna till. Men inte som köpsignal. Kör om testet själv:
+      <code>python testa_insyn.py</code>.
+      <br><br>Bortsorterat: allt kopplat till aktieprogram, optionslösen och tilldelningar
+      (det är lön, inte övertygelse), samt teckningsoptioner och obligationer där kolumnerna
+      betyder något annat. Transaktioner över 50 miljoner redovisas separat som
+      storägarhandel — Tele2 låg på 5,4 miljarder, och det var Iliad som ökade, inte vd:ns
+      privatekonomi.
+    </div>
+    <div class="rad" style="margin-top:12px">
+      <div><label>Marknad</label><br><select id="in-marknad">
+        <option value="">alla</option><option>Sverige</option><option>USA</option></select></div>
+      <div><label>Visa</label><br><select id="in-vad">
+        <option value="kop">störst nettoköp först</option>
+        <option value="salj">störst nettosälj först</option>
+        <option value="tunga">bara där vd/finanschef/ordförande köpt</option></select></div>
+    </div>
+  </div>
+  <div id="insyn-innehall"></div>
+</div>
+
+<!-- ══════════════════════════ OMSKRIVET ══════════════════════════ -->
+<div class="sida" id="sida-omskrivet">
+  <div class="kort">
+    <h1>Vilka har skrivit om sin rapport?</h1>
+    <p style="max-width:86ch">Bolag skriver rapporter genom att kopiera fjolårets text och ändra
+      det som måste ändras. Talet nedan är cosinuslikheten mot förra jämförbara rapporten:
+      <b>1,000 = ordagrant samma text</b>. Ju lägre, desto mer har bolaget aktivt skrivit om.
+      Enligt <b>Lazy Prices</b> (Cohen, Malloy &amp; Nguyen, Journal of Finance 2020) är stora
+      omskrivningar — särskilt i riskavsnittet — en signal om att något faktiskt hänt.</p>
+    <div class="rad" style="margin-top:12px">
+      <div><label>Marknad</label><br><select id="om-marknad">
+        <option value="">alla</option><option>Sverige</option><option>USA</option></select></div>
+      <div><label>Grupp</label><br><select id="om-grupp"><option value="">alla</option>
+        <option value="karna">Kärna</option>
+        <option value="halvledare_ai">Halvledare &amp; AI</option></select></div>
+      <div><label>Visa</label><br><select id="om-antal">
+        <option value="25">25 mest omskrivna</option><option value="50">50</option>
+        <option value="9999">alla</option></select></div>
+      <div><label>Sortera på</label><br><select id="om-sort">
+        <option value="percentil_marknad">mest omskrivet (inom marknaden)</option>
+        <option value="likhet">lägst likhet rakt av</option>
+        <option value="nya_risker">flest nya riskstycken</option>
+        <option value="flaggvikt">tyngst röda flaggor</option>
+        <option value="negativa_forandring">störst ökning av negativa ord</option></select></div>
+    </div>
+  </div>
+  <div id="omskrivet-innehall"></div>
+</div>
+
+<!-- ═══════════════════════════ VALIDERING ═══════════════════════════ -->
+<div class="sida" id="sida-validering">
+  <div class="varning-ruta">
+    <b>Läs den här fliken före allt annat.</b> Poängen i Jakt-fliken är min modell, inte en
+    naturlag. Här testas den mot verkligheten: hur hade rangordningen sett ut varje 30 juni
+    bakåt i tiden, med enbart den information som var publicerad då — och gick de högst
+    rankade bolagen faktiskt bättre de följande tolv månaderna? Med en nollkontroll mot
+    slumpmässiga poäng, så att ett resultat som ryms inom turen inte får kallas något annat.
+  </div>
+  <div class="kort">
+    <div class="rad">
+      <button class="primar" id="knapp-validera">Kör valideringen</button>
+      <label style="display:flex;gap:6px;align-items:center">
+        <input type="checkbox" id="val-rapporter" style="width:auto"> ta med rapportsignaler
+        <span class="svag">(laddar ner ~800 årsredovisningar första gången — långsamt)</span>
+      </label>
+      <span class="status" id="status-validering"></span>
+    </div>
+  </div>
+  <div id="validering-innehall"><div class="tom">Ingen validering körd ännu.</div></div>
+</div>
+
+<!-- ═════════════════════════════ HJÄLP ═════════════════════════════ -->
+<div class="sida" id="sida-hjalp">
+  <div class="kort">
+    <div class="rad" style="justify-content:space-between">
+      <div><h1>Hjälp</h1>
+        <div class="svag liten">Arbetsgången steg för steg, och varje ord i appen förklarat.</div></div>
+      <div><label>Sök i ordlistan</label><br>
+        <input id="ordsok" placeholder="t.ex. altman, soliditet, p/e" style="min-width:260px"></div>
+    </div>
+  </div>
+  <div id="hjalp-innehall"></div>
+</div>
+
+<!-- ═════════════════════════════ METOD ═════════════════════════════ -->
+<div class="sida" id="sida-metod">
+  <div id="metod-innehall"></div>
+</div>
+
+</main>
+
+<div class="modalbg" id="modalbg"><div class="modal" id="modal"></div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const PELARE = ["Kvalitet","Värdering","Finansiell styrka","Tillväxt","Marknad","Rapportsignaler"];
+let SKANNING = null, SORT = {falt:"poang", ned:true}, UNIVERSUM = [];
+
+/* ───────────────────────────── flikar ───────────────────────────── */
+const FLIKAR = [["idag","Idag"],["jakt","Jakt"],["case","Case"],["rapport","Rapport"],
+                ["omskrivet","Omskrivet"],["insyn","Insyn"],
+                ["validering","Validering"],["metod","Metod"],["hjalp","Hjälp"]];
+$("#flikar").innerHTML = FLIKAR.map(([id,namn],i)=>
+  `<div class="flik ${i===0?'pa':''}" data-f="${id}">${namn}</div>`).join("");
+$$(".flik").forEach(f=>f.onclick=()=>visaFlik(f.dataset.f));
+function visaFlik(id){
+  $$(".flik").forEach(f=>f.classList.toggle("pa",f.dataset.f===id));
+  $$(".sida").forEach(s=>s.classList.toggle("pa",s.id==="sida-"+id));
+  // Byter man till Rapport ska den handla om samma bolag som man just tittade
+  // på. Annars visas första bästa bolag i listan, vilket ser ut som en bugg
+  // därför att det ÄR en.
+  if(id==="rapport"){
+    const sym = $("#case-val").value;
+    if(sym && [...$("#rap-val").options].some(o=>o.value===sym)) {
+      if($("#rap-val").value !== sym){ $("#rap-val").value = sym; $("#rapport-innehall").innerHTML=""; $("#status-rapport").innerHTML=""; }
+    }
+  }
+  if(id==="metod" && !$("#metod-innehall").dataset.laddad) laddaMetod();
+  if(id==="hjalp" && !$("#hjalp-innehall").dataset.laddad) laddaHjalp();
+  if(id==="validering") laddaValidering();
+  if(id==="omskrivet") laddaOmskrivet();
+  if(id==="idag") laddaIdag();
+  if(id==="insyn") laddaInsyn();
+}
+
+/* ─────────────────────────── hjälpformat ────────────────────────── */
+const p1 = v => v==null? "–" : v.toFixed(1);
+const p0 = v => v==null? "–" : v.toFixed(0);
+const pct = (v,d=1) => v==null? "–" : (v*100).toFixed(d)+" %";
+const ggr = v => v==null? "–" : v.toFixed(1)+"x";
+const stort = v => {
+  if(v==null) return "–";
+  const a=Math.abs(v);
+  if(a>=1e12) return (v/1e12).toFixed(2)+" bn";
+  if(a>=1e9) return (v/1e9).toFixed(1)+" mdr";
+  if(a>=1e6) return (v/1e6).toFixed(0)+" mn";
+  return v.toFixed(0);
+};
+function farg(p){
+  if(p==null) return "var(--svagare)";
+  if(p>=75) return "var(--gron)";
+  if(p>=55) return "var(--bla)";
+  if(p>=35) return "var(--gul)";
+  return "var(--rod)";
+}
+function matare(p,bredd=54){
+  if(p==null) return `<span class="svagare">–</span>`;
+  return `<span class="matare" style="width:${bredd}px;display:inline-block">
+    <i style="width:${Math.max(2,Math.min(100,p))}%;background:${farg(p)}"></i></span>`;
+}
+const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,c=>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ───────────────────────────── polling ─────────────────────────── */
+let pollTimer=null;
+function poll(vad, statusEl, klar){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    const s = await (await fetch("/api/status")).json();
+    if(s.fel){ statusEl.innerHTML=`<span class="rod">Fel: ${esc(s.fel)}</span>`;
+               clearInterval(pollTimer); knappar(false); return; }
+    if(s.kor){
+      const del = s.av? ` ${s.klart}/${s.av}` : "";
+      statusEl.innerHTML=`<span class="spinn"></span>${esc(s.vad)}${del} — ${esc(s.meddelande)}`;
+    } else {
+      clearInterval(pollTimer); knappar(false);
+      statusEl.innerHTML=`<span class="gron">${esc(s.meddelande||"klart")}</span>`;
+      klar();
+    }
+  }, 700);
+}
+function knappar(av){
+  ["#knapp-skanna","#knapp-validera","#knapp-case","#knapp-rapport"].forEach(k=>{
+    const e=$(k); if(e) e.disabled=av;});
+}
+
+/* ════════════════════════════ JAKT ════════════════════════════ */
+$("#knapp-skanna").onclick = async()=>{
+  knappar(true);
+  $("#status-jakt").innerHTML='<span class="spinn"></span>startar…';
+  const r = await fetch("/api/skanna",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({profil:$("#profil").value})});
+  if(!r.ok){ $("#status-jakt").innerHTML='<span class="rod">Ett jobb kör redan.</span>';
+             knappar(false); return; }
+  poll("skanning", $("#status-jakt"), laddaSkanning);
+};
+
+$("#profil").onchange = async()=>{
+  if(!SKANNING) return;
+  $("#status-jakt").innerHTML='<span class="spinn"></span>viktar om…';
+  SKANNING = await (await fetch("/api/omrangordna",{method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({profil:$("#profil").value})})).json();
+  $("#status-jakt").innerHTML='<span class="svag">omviktat utan ny hämtning</span>';
+  ritaTabell();
+};
+["#f-grupp","#f-marknad","#f-bransch","#f-tackning","#f-varning","#f-rapport"]
+  .forEach(s=>$(s).onchange=ritaTabell);
+$$("th.sorterbar").forEach(th=>th.onclick=()=>{
+  const f=th.dataset.s;
+  SORT = {falt:f, ned: SORT.falt===f ? !SORT.ned : true};
+  ritaTabell();
+});
+
+async function laddaSkanning(){
+  const d = await (await fetch("/api/skanning")).json();
+  if(!d.finns) return;
+  SKANNING = d;
+  $("#profil").value = d.profil || "sammansatt";
+  const branscher=[...new Set(d.case.map(c=>c.bransch))].sort();
+  $("#f-bransch").innerHTML = '<option value="">alla</option>'+
+    branscher.map(b=>`<option>${esc(b)}</option>`).join("");
+  const val = d.case.map(c=>`<option value="${esc(c.symbol)}">${esc(c.namn)} (${esc(c.symbol)})</option>`).join("");
+  $("#case-val").innerHTML = val;
+  $("#rap-val").innerHTML = d.case.map(c=>
+    `<option value="${esc(c.symbol)}">${esc(c.namn)} (${esc(c.symbol)})` +
+    `${c.marknad==="Sverige"?" · MFN":" · SEC"}</option>`).join("");
+  ritaTabell();
+}
+
+function filtrerade(){
+  if(!SKANNING) return [];
+  const g=$("#f-grupp").value, m=$("#f-marknad").value, b=$("#f-bransch").value,
+        t=parseFloat($("#f-tackning").value), v=$("#f-varning").value, r=$("#f-rapport").value;
+  return SKANNING.case.filter(c=>
+    (!g||c.grupp===g) && (!m||c.marknad===m) && (!b||c.bransch===b) && (c.tackning||0)>=t &&
+    (v==="alla" || (v==="utan"? c.varningar.length===0 : c.varningar.length>0)) &&
+    (r==="alla" || c.har_rapport));
+}
+
+// Dagar till rapport MÅSTE räknas när sidan visas, inte när skanningen kördes.
+// Ett sparat "0 d" står kvar som 0 nästa dag, och då ser det ut som att rapporten
+// kommer idag fast den var igår. Datumet är fakta; nedräkningen är färskvara.
+function dagarTill(datum){
+  if(!datum) return null;
+  const d = new Date(datum + "T00:00:00");
+  if(isNaN(d)) return null;
+  const idag = new Date();
+  idag.setHours(0,0,0,0);
+  return Math.round((d - idag) / 86400000);
+}
+
+function rapportcell(c){
+  const k=c.kalender||{};
+  const dg = dagarTill(k.kommande);
+  if(dg==null) return '<span class="svagare">–</span>';
+  if(dg < 0){
+    const sedan = -dg;
+    return `<span class="gul" title="Skanningen är äldre än rapporten">rapporterade${
+      sedan===1? " igår" : ` för ${sedan} dagar sedan`}</span>
+      <div class="minsta svagare">skanna om</div>`;
+  }
+  // Under fem rapporter är "typisk rörelse" ett medelvärde av brus. Wolfspeed
+  // visade ±0,0 % på en enda observation. Då är tomt bättre än fel.
+  const s = k.statistik||{};
+  const rorelse = (s.median_rorelse!=null && (s.antal||0)>=5)
+    ? `<div class="minsta svagare">±${(s.median_rorelse*100).toFixed(1)} %</div>`
+    : `<div class="minsta svagare">–</div>`;
+  const f = dg===0 ? "var(--rod)" : dg<=7 ? "var(--rod)" : dg<=21 ? "var(--gul)" : "var(--svag)";
+  const osaker = k.datumsakerhet && !k.datumsakerhet.startsWith("bekräftat") ? "~" : "";
+  const etikett = dg===0 ? "IDAG" : `${osaker}${dg} d`;
+  return `<span style="color:${f}" title="${esc(k.datumsakerhet||"")}">${etikett}</span>${rorelse}`;
+}
+
+function ritaTabell(){
+  const rader = filtrerade();
+  const nyckel = c => {
+    if(SORT.falt==="namn") return c.namn;
+    if(SORT.falt==="poang") return c.poang ?? -1;
+    if(SORT.falt==="tackning") return c.tackning ?? -1;
+    if(SORT.falt==="rapport"){ const v = dagarTill((c.kalender||{}).kommande);
+      return -(v==null? 9999 : (v<0 ? 9000+v : v)); }
+    return (c.pelare[SORT.falt]||{}).poang ?? -1;
+  };
+  rader.sort((a,b)=>{
+    const x=nyckel(a), y=nyckel(b);
+    const c = typeof x==="string" ? x.localeCompare(y,"sv") : x-y;
+    return SORT.ned ? -c : c;
+  });
+  if(!rader.length){ $("#tbody").innerHTML=
+    '<tr><td colspan="13" class="tom">Inga bolag matchar filtret.</td></tr>'; return; }
+
+  $("#tbody").innerHTML = rader.map((c,i)=>{
+    const q = n => { const v=(c.pelare[n]||{}).poang;
+      return `<td class="h" style="color:${farg(v)}">${p0(v)}</td>`; };
+    const varn = c.varningar.map(v=>
+      `<span class="pill ${v.avdrag>=10?'fara':'varn'}">${esc(v.rubrik)}</span>`).join(" ");
+    return `<tr class="klickbar" data-sym="${esc(c.symbol)}">
+      <td class="svagare minsta h">${i+1}</td>
+      <td><b>${esc(c.namn)}</b><div class="minsta svagare">${esc(c.symbol)} · ${esc(c.marknad)}${
+        c.har_rapport?' · <span class="bla">rapport läst</span>':''}</div></td>
+      <td class="liten svag">${esc(c.bransch)}</td>
+      <td class="h poang" style="color:${farg(c.poang)}">${p1(c.poang)}</td>
+      <td class="h">${matare(c.poang,80)}</td>
+      ${PELARE.map(q).join("")}
+      <td class="h liten">${rapportcell(c)}</td>
+      <td class="h liten svag">${p0((c.tackning||0)*100)}%</td>
+      <td>${varn||'<span class="svagare minsta">–</span>'}</td>
+    </tr>`;
+  }).join("");
+  $$("#tbody tr.klickbar").forEach(tr=>tr.onclick=()=>{
+    $("#case-val").value = tr.dataset.sym; visaFlik("case"); ritaCaseFranLista(tr.dataset.sym);
+  });
+  // Vad filtren döljer, och varför. Fabege syntes i Insyn-fliken men saknades i
+  // Jakt, och orsaken var att standardfiltret på 80 % täckning tog bort den
+  // utan ett ord. Ett filter som gömmer tyst är samma sak som en bugg.
+  const alla = SKANNING.case;
+  const bortfiltrerade = alla.length - rader.length;
+  const doldaAvTackning = alla.filter(c=>(c.tackning||0) < parseFloat($("#f-tackning").value)).length;
+  const namnPaDolda = alla.filter(c=>(c.tackning||0) < parseFloat($("#f-tackning").value))
+    .map(c=>c.namn).slice(0,8);
+  const filterInfo = bortfiltrerade
+    ? `<div class="varning-ruta" style="margin-top:10px">
+        <b>${bortfiltrerade} bolag döljs av filtren just nu.</b>
+        ${doldaAvTackning? ` Av dem faller ${doldaAvTackning} på täckningskravet
+          (${(parseFloat($("#f-tackning").value)*100).toFixed(0)} %) — typiskt fastighets- och
+          investmentbolag där de flesta måtten inte betyder något: ${esc(namnPaDolda.join(", "))}${
+          doldaAvTackning>8? " m.fl.":""}.`:""}
+        <button id="visa-alla" style="margin-left:8px">Visa alla</button>
+       </div>`
+    : "";
+
+  $("#jakt-fot").innerHTML = filterInfo + `${rader.length} bolag visas av ${SKANNING.case.length} bedömda.
+    Percentilerna räknas <b>inom gruppen</b> — halvledare jämförs med halvledare, inte med Axfood.
+    Skannat ${esc((SKANNING.tid||"").slice(0,16).replace("T"," "))} ·
+    ${SKANNING.antal_med_rapport} med läst årsredovisning ·
+    ${Object.keys(SKANNING.fel||{}).length} kunde inte hämtas.`;
+
+  // Bindningen måste ske EFTER att foten ritats. Låg den före fanns knappen
+  // ännu inte i dokumentet, och "Visa alla" gjorde ingenting alls.
+  const knapp = $("#visa-alla");
+  if(knapp) knapp.onclick = ()=>{
+    $("#f-tackning").value = "0"; $("#f-marknad").value = ""; $("#f-bransch").value = "";
+    $("#f-grupp").value = ""; $("#f-varning").value = "alla"; $("#f-rapport").value = "alla";
+    ritaTabell();
+  };
+}
+
+/* ════════════════════════════ CASE ════════════════════════════ */
+$("#case-val").onchange = ()=>ritaCaseFranLista($("#case-val").value);
+$("#knapp-case").onclick = async()=>{
+  const sym=$("#case-val").value; if(!sym) return;
+  $("#status-case").innerHTML='<span class="spinn"></span>hämtar färska siffror och rapporter…';
+  try{
+    const d = await (await fetch(`/api/case/${encodeURIComponent(sym)}?profil=${$("#profil").value}`)).json();
+    $("#status-case").innerHTML = d.fel? `<span class="rod">${esc(d.fel)}</span>`
+      : '<span class="gron">uppdaterat</span>';
+    if(!d.fel) ritaCase(d);
+  }catch(e){ $("#status-case").innerHTML=`<span class="rod">${esc(e.message)}</span>`; }
+};
+function ritaCaseFranLista(sym){
+  const c = (SKANNING?.case||[]).find(x=>x.symbol===sym);
+  if(c) ritaCase(c); else $("#knapp-case").click();
+}
+
+function pelarrader(c){
+  return PELARE.map(n=>{
+    const p=(c.pelare[n]||{});
+    if(p.poang==null) return `<div class="pelarrad"><span class="svagare">${n}</span>
+      <span class="minsta svagare">saknar data</span><span></span></div>`;
+    return `<div class="pelarrad"><span class="svag">${n}</span>
+      <span class="matare"><i style="width:${p.poang}%;background:${farg(p.poang)}"></i></span>
+      <span class="h" style="color:${farg(p.poang)}">${p0(p.poang)}</span></div>`;
+  }).join("");
+}
+
+function radKort(c){
+  const r = c.rad;
+  if(!r) return "";
+  const fg = NIVAFARG[r.niva] || "var(--svagare)";
+  return `<div class="kort" style="border-left:4px solid ${fg}">
+    <div class="rad" style="justify-content:space-between;align-items:baseline">
+      <h2 style="margin:0">${esc(r.rubrik)}</h2>
+      <span class="minsta svagare">appens besked</span>
+    </div>
+    <div style="margin-top:8px">
+      ${r.skal.map(x=>`<div class="liten svag" style="margin-bottom:3px">${esc(x)}</div>`).join("")}
+    </div>
+    <div style="margin-top:10px">
+      ${r.gor.map(x=>{
+        const lage = x.startsWith("LÄGE:") || x.startsWith("INSYN:");
+        return `<div style="padding:4px 0 4px 12px;border-left:2px solid ${
+          lage? "var(--lila)":fg};margin-bottom:5px;max-width:88ch">${
+          lage? "<b>"+esc(x.slice(0,5))+"</b>"+esc(x.slice(5)) : esc(x)}</div>`;}).join("")}
+    </div>
+    ${r.lage? `<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--linje)">
+      <div class="minsta svag" style="margin-bottom:5px">LÄGET JUST NU —
+        ${esc(r.lage.niva)}</div>
+      ${r.lage.rader.map(x=>`<div class="liten svag" style="margin-bottom:3px">${esc(x)}</div>`).join("")}
+      <div class="minsta" style="color:var(--gul);margin-top:7px">${esc(r.lage.bevis)}</div>
+    </div>`:""}
+  </div>`;
+}
+
+function ritaCase(c){
+  const m=c.matt||{};
+  // Banker visar bankmått. Att visa "EV/EBITDA –" och "ROIC –" på en bank är
+  // inte bara tomt, det är vilseledande: det ser ut som att data saknas, när
+  // sanningen är att måtten inte betyder något för en bank.
+  const arBank = c.bransch === "Bank";
+  const nyckeltal = arBank ? [
+    ["Kurs", c.kurs!=null? c.kurs.toFixed(2)+" "+(c.rapportvaluta||"") : "–"],
+    ["Börsvärde", stort(m.borsvarde)+" "+(m.rapportvaluta||"")],
+    ["P/B", ggr(m.pb)], ["P/E", ggr(m.pe)],
+    ["Direktavkastning", pct(m.direktavkastning)],
+    ["K/I-tal", m.ki_tal!=null? m.ki_tal.toFixed(3):"–"],
+    ["K/I-trend per år", m.ki_trend!=null? (m.ki_trend>0?"+":"")+m.ki_trend.toFixed(3):"–"],
+    ["Avkastning eget kapital", pct(m.roe)],
+    ["Avkastning tillgångar", pct(m.roa,2)],
+    ["Räntenetto / tillgångar", pct(m.rantenetto_marginal,2)],
+    ["Eget kapital / tillgångar", pct(m.kapitalstyrka)],
+    ["Intäkter utanför räntenettot", pct(m.intaktsdiversifiering,0)],
+    ["Balansräkningens tillväxt", pct(m.tillgangstillvaxt)],
+    ["Intäktstillväxt 3 år", pct(m.tillvaxt_3ar)],
+    ["Vinsttillväxt 3 år", pct(m.vinsttillvaxt_3ar)],
+    ["Momentum 12-1", pct(m.momentum_12_1)],
+    ["Volatilitet", pct(m.volatilitet)],
+    ["Största fall (10 år)", pct(m.max_fall_10ar)],
+  ] : [
+    ["Kurs", c.kurs!=null? c.kurs.toFixed(2)+" "+(c.rapportvaluta||"") : "–"],
+    ["Börsvärde", stort(m.borsvarde)+" "+(m.rapportvaluta||"")],
+    ["P/E", ggr(m.pe)], ["EV/EBITDA", ggr(m.ev_ebitda)],
+    ["EBIT/EV", pct(m.ebit_ev)], ["Fritt kassaflöde / EV", pct(m.fcf_yield)],
+    ["ROIC", pct(m.roic)], ["ROIC 5 år", pct(m.roic_5ar)],
+    ["Bruttolönsamhet", m.bruttolonsamhet!=null? m.bruttolonsamhet.toFixed(2):"–"],
+    ["Rörelsemarginal", pct(m.rorelsemarginal)],
+    ["Kassaflöde/vinst", m.kassagenerering!=null? m.kassagenerering.toFixed(2):"–"],
+    ["Nettoskuld/EBITDA", ggr(m.nettoskuld_ebitda)],
+    ["Soliditet", pct(m.soliditet)],
+    ["Piotroski F", m.piotroski_poang!=null? m.piotroski_poang+" / 9":"–"],
+    ["Altman Z''", p1(m.altman_z)],
+    ["Beneish M", m.beneish_m!=null? m.beneish_m.toFixed(2):"–"],
+    ["Periodiseringar", m.accruals!=null? m.accruals.toFixed(3):"–"],
+    ["Tillväxt 3 år", pct(m.tillvaxt_3ar)],
+    ["Momentum 12-1", pct(m.momentum_12_1)],
+    ["Volatilitet", pct(m.volatilitet)],
+    ["Största fall (10 år)", pct(m.max_fall_10ar)],
+  ];
+
+  let html = `
+  <div class="kort">
+    <div class="rad" style="justify-content:space-between;align-items:flex-start">
+      <div style="flex:1;min-width:280px">
+        <h1>${esc(c.rubrik)}</h1>
+        <div class="svag liten">${esc(c.symbol)} · ${esc(c.bransch)} · ${esc(c.marknad)} ·
+          profil ${esc(c.profil)} · räkenskapsår ${esc(m.ar||"")}
+          ${m.kalla?`· källa ${esc(m.kalla)}`:""}${m.publicerad?` (publicerad ${esc(m.publicerad)})`:""}</div>
+        <p style="margin:12px 0 0;max-width:70ch">${esc(c.tes)}</p>
+      </div>
+      <div style="text-align:right">
+        <div class="poang" style="font-size:34px;color:${farg(c.poang)}">${p1(c.poang)}</div>
+        <div class="minsta svag">av 100 · täckning ${p0((c.tackning||0)*100)} %
+          ${c.avdrag? `<br><span class="rod">−${c.avdrag} i avdrag</span>`:""}</div>
+      </div>
+    </div>
+  </div>
+
+  ${radKort(c)}
+  <div class="tre">
+    <div class="kort"><h3>Pelare</h3>${pelarrader(c)}
+      <div class="minsta svagare" style="margin-top:8px">Percentil mot övriga bolag i skanningen.
+        50 = mitten. Pelare utan tillräcklig data räknas inte in i poängen.</div></div>
+    <div class="kort"><h3>Nyckeltal</h3><div class="nyckel">
+      ${nyckeltal.map(([k,v])=>`<div>${k}</div><div>${v}</div>`).join("")}</div></div>
+    <div class="kort"><h3>Det som talar för</h3>
+      ${c.for?.length? c.for.map(b=>`<div class="bevis">${esc(b.text)}
+        <div class="minsta svagare">${esc(b.pelare)} · percentil ${p0(b.percentil)}</div></div>`).join("")
+        : '<div class="svagare liten">Inget mått ligger i toppskiktet.</div>'}
+      <h3 style="margin-top:16px">Det som talar emot</h3>
+      ${c.mot?.length? c.mot.map(b=>`<div class="bevis mot">${esc(b.text)}
+        <div class="minsta svagare">${esc(b.pelare)} · percentil ${p0(b.percentil)}</div></div>`).join("")
+        : '<div class="svagare liten">Inget mått ligger i bottenskiktet.</div>'}
+    </div>
+  </div>`;
+
+  // Tolkningen i klartext hör hemma överst. Den låg tidigare sist i
+  // rapportkortet — tecken 4007 av 9983 på Intels sida — vilket i praktiken
+  // betyder att ingen hittade den.
+  const rt = (c.rapport||{}).tolkning || [];
+  if(rt.length){
+    html += `<div class="kort">
+      <h2>Vad rapporten säger</h2>
+      <div class="liten svag" style="margin-bottom:10px">${esc(c.rapport.form||"")}
+        ${c.rapport.senaste?.datum? "· inlämnad "+esc(c.rapport.senaste.datum):""}
+        ${c.rapport.foregaende?.datum? "· jämförd med "+esc(c.rapport.foregaende.datum):""}</div>
+      ${rt.map(t=>{
+        const fg = t.vikt>=3? "var(--rod)" : t.vikt===2? "var(--gul)"
+                 : t.vikt===1? "var(--gron)" : "var(--svagare)";
+        return `<div style="border-left:3px solid ${fg};padding:5px 0 5px 12px;
+          margin-bottom:8px;max-width:88ch">${esc(t.text)}</div>`;}).join("")}
+      <div class="minsta svagare" style="margin-top:8px">Detaljerna — tonlägestrend,
+        citat ur röda flaggor och de nya riskstyckena i sin helhet — står längre ned
+        på sidan.</div>
+    </div>`;
+  }
+
+  if(c.varningar?.length){
+    html += `<div class="kort"><h2>Varningar</h2>` + c.varningar.map(v=>
+      `<div class="varnkort ${v.avdrag>=10?'fara':''}">
+        <b>${esc(v.rubrik)}</b> <span class="pill fara">−${v.avdrag} poäng</span>
+        <div class="liten svag" style="margin-top:4px">${esc(v.forklaring)}</div></div>`).join("")
+      + `</div>`;
+  }
+
+  html += `<div class="kort"><h2>Vad som skulle göra caset fel</h2>
+    <p class="liten svag">Ett case man inte kan motbevisa är inte ett case, det är en förhoppning.
+      Skriv upp de här och kolla dem vid varje kvartalsrapport.</p>
+    ${(c.falsifiering||[]).map(f=>`<div class="falsi"><b>${esc(f.villkor)}</b>
+      <div class="liten svag">${esc(f.varfor)}</div></div>`).join("")}</div>`;
+
+  if(c.kalender?.kommande) html += kalenderKort(c.kalender);
+  if(c.historik?.length) html += historikTabell(c.historik);
+  if(c.kurshistorik && Object.keys(c.kurshistorik).length)
+    html += `<div class="kort"><h2>Kurs, 5 år</h2>${kursgraf(c.kurshistorik)}</div>`;
+  if(c.rapport?.tillganglig) html += rapportKort(c.rapport, "Rapporten i detalj", false);
+  else html += `<div class="kort"><h2>Rapporten</h2><div class="svag liten">
+    ${c.marknad==="Sverige"
+      ? "Svenska bolag saknar en öppen rapportdatabas motsvarande SEC:s. Använd fliken Rapport → ”Läs en egen rapport” och peka ut årsredovisningen."
+      : (c.har_rapport
+          ? "Rapporten lästes i skanningen men sammanfattningen sparades inte. Tryck ”Hämta färska siffror”."
+          : "Ingen rapport hittades hos SEC för symbolen.")}</div></div>`;
+
+  $("#case-innehall").innerHTML = html;
+}
+
+function kalenderKort(k){
+  const s=k.statistik||{}, g=k.gissning||{};
+  const m = SKANNING?.rapportmodell;
+  const traff = m ? (m.traffsakerhet*100).toFixed(1) : null;
+  const rader=(k.reaktioner||[]).slice(-10);
+  return `<div class="kort">
+    <h2>Nästa rapport och vad som brukar hända</h2>
+    <div class="rad" style="gap:28px;align-items:flex-start">
+      <div>
+        <div class="minsta svag">RAPPORTDAG</div>
+        <div style="font-size:24px;font-weight:600">${esc(k.kommande)}</div>
+        <div class="liten svag">${(()=>{const v=dagarTill(k.kommande);
+            return v==null? "" : v>0? `om ${v} dagar` : v===0? "idag"
+                 : `<span class="gul">rapporten kom för ${-v} dagar sedan — tryck ”Hämta färska siffror”</span>`;})()}
+          ${k.estimat_eps!=null? `· förväntad vinst/aktie ${(+k.estimat_eps).toFixed(2)}`:""}</div>
+        <div class="minsta ${k.datumsakerhet&&k.datumsakerhet.startsWith("bekräftat")?"gron":"gul"}">
+          ${esc(k.datumsakerhet||"")}</div>
+      </div>
+      <div>
+        <div class="minsta svag">TYPISK RÖRELSE PÅ RAPPORTDAGEN</div>
+        <div style="font-size:24px;font-weight:600">${(s.antal||0)>=5&&s.median_rorelse!=null
+          ? "±"+(s.median_rorelse*100).toFixed(1)+" %" : "–"}</div>
+        <div class="liten svag">${(s.antal||0)>=5? `median av ${s.antal} rapporter · störst`
+          : `bara ${s.antal||0} rapporter i historiken — för lite för att säga något. Störst`}
+          ${s.storsta_upp!=null?"+"+(s.storsta_upp*100).toFixed(0):"–"} % /
+          ${s.storsta_ner!=null?(s.storsta_ner*100).toFixed(0):"–"} %</div>
+      </div>
+      <div>
+        <div class="minsta svag">HISTORISKT UPP</div>
+        <div style="font-size:24px;font-weight:600">${(s.antal||0)>=5&&s.andel_upp!=null
+          ?(s.andel_upp*100).toFixed(0)+" %":"–"}</div>
+        <div class="liten svag">${s.andel_slog_estimat!=null
+          ? `slog analytikernas estimat ${(s.andel_slog_estimat*100).toFixed(0)} % av gångerna`:""}</div>
+      </div>
+    </div>
+
+    <div class="varning-ruta" style="margin-top:16px">
+      <b>${!traff
+        ? "Riktningsgissningen är dold tills modellen har testats."
+        : (g.sannolikhet!=null
+            ? `Riktningsgissning: ${(g.sannolikhet*100).toFixed(0)} % sannolikhet ${esc(g.riktning)}`
+            : "Riktningsgissning: för få rapporter")}</b>
+      ${!traff? `<div style="margin-top:6px">En sannolikhet utan känd träffsäkerhet är
+        en spådom, inte en statistik. Kör <code>python rapportkalender.py</code> en gång —
+        det tar några minuter och mäter hur ofta metoden faktiskt haft rätt. Sedan visas
+        talet, med den siffran bredvid.</div>`:""}
+      ${traff? `<div style="margin-top:6px">Men läs den här siffran först:
+        <b>metoden har haft rätt i ${traff} % av fallen</b>, mätt rullande framåt på
+        ${m.antal_rapporter} rapporter i ${m.antal_bolag} bolag. Att alltid gissa upp hade
+        gett ${(m.alltid_upp_traffsakerhet*100).toFixed(1)} %. Skillnaden mot slantsingling
+        är inte statistiskt säkerställd (p = ${m.p_varde.toFixed(3)}).
+        <b>Riktningen går alltså inte att förutsäga.</b> Det som ÄR värt något på det här
+        kortet är rörelsens STORLEK — den säger vad du riskerar över rapportdagen.</div>`
+        : ""}
+    </div>
+
+    ${rader.length? `<h3 style="margin-top:16px">De senaste rapporterna</h3>
+    <table style="max-width:640px"><thead><tr><th>Datum</th>
+      <th class="h">Reaktion</th><th class="h">Överraskning mot estimat</th>
+      <th class="h">20 dagar efter</th></tr></thead><tbody>
+      ${rader.map(r=>`<tr><td>${esc(r.datum)}</td>
+        <td class="h" style="color:${r.reaktion>0?'var(--gron)':'var(--rod)'}">
+          ${r.reaktion>0?"+":""}${(r.reaktion*100).toFixed(1)} %</td>
+        <td class="h svag">${r.overraskning!=null?(r.overraskning>0?"+":"")+r.overraskning.toFixed(1)+" %":"–"}</td>
+        <td class="h svag">${r.drift_20d!=null?(r.drift_20d>0?"+":"")+(r.drift_20d*100).toFixed(1)+" %":"–"}</td>
+      </tr>`).join("")}</tbody></table>`:""}
+  </div>`;
+}
+
+function historikTabell(h){
+  const rader=[["intakter","Omsättning"],["bruttovinst","Bruttovinst"],
+    ["rorelseresultat","Rörelseresultat"],["nettoresultat","Nettoresultat"],
+    ["kfo","Kassaflöde från rörelsen"],["capex","Investeringar"],
+    ["fritt_kassaflode","Fritt kassaflöde"],["tillgangar","Tillgångar"],
+    ["eget_kapital","Eget kapital"],["total_skuld","Räntebärande skuld"],
+    ["kassa","Kassa"],["aktier_utspadda","Antal aktier"]];
+  const ar=h.slice(-10);
+  return `<div class="kort" style="overflow:auto"><h2>Bokslut, ${ar.length} år</h2>
+  <table><thead><tr><th>Post</th>${ar.map(a=>
+    `<th class="h">${esc((a.slut||"").slice(0,4))}</th>`).join("")}</tr></thead>
+  <tbody>${rader.map(([f,namn])=>`<tr><td class="svag">${namn}</td>${
+    ar.map(a=>`<td class="h">${stort(a[f])}</td>`).join("")}</tr>`).join("")}
+  </tbody></table>
+  <div class="minsta svagare" style="margin-top:8px">
+    Källa per år: ${ar.map(a=>`${(a.slut||"").slice(0,4)}=${a.kalla}`).join(", ")}.
+    "edgar" betyder att siffran är hämtad ur bolagets egen XBRL-inlämning till SEC,
+    med publiceringsdatum.</div></div>`;
+}
+
+function kursgraf(kh){
+  const poster=Object.entries(kh).slice(-1300);
+  if(poster.length<10) return '<div class="svagare">för lite data</div>';
+  const v=poster.map(p=>p[1]), min=Math.min(...v), max=Math.max(...v);
+  const B=900,H=180, steg=B/(poster.length-1);
+  const pkt=v.map((y,i)=>`${(i*steg).toFixed(1)},${(H-(y-min)/(max-min||1)*(H-10)-5).toFixed(1)}`).join(" ");
+  const stig=v[v.length-1]>=v[0];
+  return `<svg viewBox="0 0 ${B} ${H}" style="width:100%;height:180px">
+    <polyline points="${pkt}" fill="none" stroke="${stig?'var(--gron)':'var(--rod)'}" stroke-width="1.5"/>
+  </svg>
+  <div class="rad liten svag" style="justify-content:space-between">
+    <span>${esc(poster[0][0])} · ${poster[0][1].toFixed(2)}</span>
+    <span>lägst ${min.toFixed(2)} · högst ${max.toFixed(2)}</span>
+    <span>${esc(poster[poster.length-1][0])} · ${poster[poster.length-1][1].toFixed(2)}</span></div>`;
+}
+
+/* ═══════════════════════════ RAPPORT ═══════════════════════════ */
+function tonrad(t,namn){
+  if(!t||!t.antal_ord) return "";
+  return `<div class="pelarrad" style="grid-template-columns:150px 1fr 60px">
+    <span class="svag">${namn}</span>
+    <span class="matare"><i style="width:${Math.min(100,t.negativa_pct*12)}%;
+      background:${t.negativa_pct>6?'var(--rod)':t.negativa_pct>4?'var(--gul)':'var(--gron)'}"></i></span>
+    <span class="h">${t.negativa_pct.toFixed(2)} %</span></div>`;
+}
+
+function rapportKort(r, rubrik, visaTolkning=true){
+  const f = r.forandring_risk, fv = r.forandring_vd, fh = r.forandring_hela;
+  const likhetsrad = (x,namn)=> !x? "" :
+    `<div class="pelarrad" style="grid-template-columns:190px 1fr 90px">
+      <span class="svag">${namn}</span>
+      <span class="matare"><i style="width:${Math.max(2,(x.cosinuslikhet-0.7)/0.3*100)}%;
+        background:${x.cosinuslikhet>0.92?'var(--gron)':x.cosinuslikhet>0.85?'var(--gul)':'var(--rod)'}"></i></span>
+      <span class="h">${x.cosinuslikhet.toFixed(3)}</span></div>
+      <div class="minsta svagare" style="margin:-2px 0 8px 190px">${esc(x.tolkning)}</div>`;
+
+  const tolk = !visaTolkning ? "" : (r.tolkning||[]).map(t=>{
+    const fg = t.vikt>=3? "var(--rod)" : t.vikt===2? "var(--gul)"
+             : t.vikt===1? "var(--gron)" : "var(--svagare)";
+    return `<div style="border-left:3px solid ${fg};padding:4px 0 4px 11px;margin-bottom:7px">
+      ${esc(t.text)}</div>`;
+  }).join("");
+
+  let html = `<div class="kort"><h2>${rubrik}${r.namn? " — "+esc(r.namn):""}</h2>
+    ${tolk? `<div style="margin:10px 0 16px;max-width:88ch">
+      <div class="minsta svag" style="margin-bottom:6px">VAD SIFFRORNA SÄGER</div>${tolk}</div>`:""}
+    <div class="liten svag">
+      <span class="pill">${esc(r.kalla||"SEC EDGAR")}</span>
+      ${r.jamforelse? `<span class="pill">${esc(r.jamforelse)}</span> `:""}
+      ${esc(r.form||"")} inlämnad ${esc(r.senaste?.datum||"")}
+      ${r.senaste?.url? `· <a href="${esc(r.senaste.url)}" target="_blank">öppna rapporten</a>`:""}
+      ${r.senaste?.pdf? `· <a href="${esc(r.senaste.pdf)}" target="_blank">PDF</a>`:""}
+      ${r.foregaende? `· jämförd med ${esc(r.foregaende.datum)}`:""}</div>
+
+    <div class="tva" style="margin-top:14px">
+      <div>
+        <h3>Hur mycket har bolaget skrivit om?</h3>
+        ${likhetsrad(f,"Riskavsnittet")}${likhetsrad(fv,"Vd:ns analys")}${likhetsrad(fh,"Hela rapporten")}
+        ${!f&&!fv&&!fh? '<div class="svagare liten">Bara en rapport hämtad — inget att jämföra med.</div>':""}
+        <div class="minsta svagare" style="margin-top:6px">1,000 = ordagrant samma text som i fjol.
+          Under 0,90 betyder att bolaget aktivt skrivit om sin riskbild. Cohen, Malloy &amp; Nguyen
+          (2020) fann att stora omskrivningar följdes av sämre avkastning.</div>
+      </div>
+      <div>
+        <h3>Tonläge — andel negativa ord</h3>
+        ${tonrad(r.tonlage_risk,"Riskavsnittet")}
+        ${tonrad(r.tonlage_vd,"Vd:ns analys")}
+        ${tonrad(r.tonlage_hela,"Hela rapporten")}
+        ${r.tonlage_risk?.osakerhet_pct!=null? `<div class="liten svag" style="margin-top:8px">
+          Osäkerhetsord ${r.tonlage_risk.osakerhet_pct.toFixed(2)} % ·
+          tvistord ${r.tonlage_risk.tvist_pct.toFixed(2)} % ·
+          ${r.tonlage_risk.antal_ord} ord i riskavsnittet</div>`:""}
+        <div class="minsta svagare" style="margin-top:6px">Loughran–McDonalds finansanpassade
+          lexikon (delmängd). Jämför bolaget med sig självt över tid, inte med andra bolag.</div>
+      </div>
+    </div>`;
+
+  if(r.tonlagestrend?.length>1){
+    html += `<h3 style="margin-top:16px">Tonläget över åren</h3>
+      <table style="max-width:520px"><thead><tr><th>Inlämnad</th>
+        <th class="h">Negativa ord</th><th class="h">Osäkerhetsord</th><th class="h">Ord</th></tr></thead>
+      <tbody>${r.tonlagestrend.map(t=>`<tr><td>${esc(t.datum)}</td>
+        <td class="h">${t.negativa_pct.toFixed(2)} %</td>
+        <td class="h">${t.osakerhet_pct.toFixed(2)} %</td>
+        <td class="h svag">${t.antal_ord}</td></tr>`).join("")}</tbody></table>`;
+  }
+
+  if(r.roda_flaggor?.length){
+    html += `<h3 style="margin-top:18px">Röda flaggor i texten</h3>`;
+    html += r.roda_flaggor.map(fl=>`<div class="varnkort ${fl.vikt>=4?'fara':''}">
+      <b>${esc(fl.flagga)}</b>
+      <span class="pill ${fl.vikt>=4?'fara':'varn'}">vikt ${fl.vikt} · ${fl.antal} träffar</span>
+      <div class="citat">${esc(fl.citat)}</div></div>`).join("");
+  } else {
+    html += `<div class="liten svag" style="margin-top:14px">Inga av de bevakade
+      formuleringarna hittades i rapporten.</div>`;
+  }
+
+  if(r.nya_risker?.length){
+    html += `<h3 style="margin-top:18px">Riskstycken som är nya i år (${r.nya_risker.length})</h3>
+      <p class="liten svag">Bolagets egen beskrivning av vad som förändrats. Det här är
+        ofta det mest informativa i hela årsredovisningen.</p>`;
+    html += r.nya_risker.map(n=>`<div class="falsi">
+      <div class="minsta svagare">likhet mot fjolårets närmaste stycke: ${n.likhet_mot_fjolaret.toFixed(2)}</div>
+      <div style="margin-top:4px">${esc(n.text)}</div></div>`).join("");
+  }
+  return html + `</div>`;
+}
+
+$("#knapp-rapport").onclick = async()=>{
+  const sym=$("#rap-val").value; if(!sym) return;
+  $("#status-rapport").innerHTML='<span class="spinn"></span>hämtar och läser…';
+  const r = await (await fetch(`/api/rapport/${encodeURIComponent(sym)}?djup=${$("#rap-djup").value}`)).json();
+  if(!r.tillganglig){
+    $("#status-rapport").innerHTML=`<span class="rod">${esc(r.skal||"ingen rapport")}</span>`;
+    $("#rapport-innehall").innerHTML=""; return;
+  }
+  $("#status-rapport").innerHTML='<span class="gron">klart</span>';
+  $("#rapport-innehall").innerHTML = rapportKort(r, sym);
+};
+
+$("#knapp-egen").onclick = async()=>{
+  $("#status-egen").innerHTML='<span class="spinn"></span>läser…';
+  const r = await (await fetch("/api/egen_rapport",{method:"POST",
+    headers:{"Content-Type":"application/json"}, body:JSON.stringify({
+      kalla:$("#egen-kalla").value, text:$("#egen-text").value,
+      kalla_forra:$("#egen-kalla2").value, text_forra:$("#egen-text2").value})})).json();
+  if(r.fel){ $("#status-egen").innerHTML=`<span class="rod">${esc(r.fel)}</span>`; return; }
+  $("#status-egen").innerHTML=`<span class="gron">läste ${r.tecken} tecken</span>`;
+  $("#egen-innehall").innerHTML = rapportKort(r, "Din rapport");
+};
+
+/* ═════════════════════════ VALIDERING ═════════════════════════ */
+$("#knapp-validera").onclick = async()=>{
+  knappar(true);
+  $("#status-validering").innerHTML='<span class="spinn"></span>startar…';
+  const r = await fetch("/api/validera",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({las_rapporter:$("#val-rapporter").checked})});
+  if(!r.ok){ $("#status-validering").innerHTML='<span class="rod">Ett jobb kör redan.</span>';
+             knappar(false); return; }
+  poll("validering", $("#status-validering"), laddaValidering);
+};
+
+function tavlaHtml(tavla){
+  if(!tavla || !Object.keys(tavla).length) return "";
+  const namn = {
+    sammansatt_utan_rapport:"Alla pelare sammanvägda",
+    sammansatt:"Alla pelare + rapporttext",
+    bara_kvalitet:"Bara Kvalitet",  bara_vardering:"Bara Värdering",
+    bara_styrka:"Bara Finansiell styrka", bara_tillvaxt:"Bara Tillväxt",
+    bara_marknad:"Bara Marknad (momentum)", bara_rapport:"Bara rapporttexten (Lazy Prices)",
+  };
+  const rader = Object.values(tavla).sort((a,b)=> b.topp_minus_botten - a.topp_minus_botten);
+  const godkanda = rader.filter(r=>r.godkand).length;
+  return `<div class="kort">
+    <h2>Resultattavla — allt som testats</h2>
+    <p class="liten svag" style="max-width:82ch">Varje rad är en fullständig ur-provs-körning
+      med nollkontroll: rangordningen sätts varje 30 juni med enbart då publicerad information,
+      och avkastningen mäts tolv månader framåt. <b>Topp − botten</b> är det avgörande talet —
+      är det negativt gick de lägst rankade bolagen BÄTTRE än de högst rankade.</p>
+    <table><thead><tr>
+      <th>Vad som testades</th><th class="h">Topp 20 %</th><th class="h">Botten 20 %</th>
+      <th class="h">Topp − botten</th><th class="h">Spearman</th><th class="h">p</th>
+      <th class="h">Obs</th><th>Dom</th></tr></thead><tbody>
+      ${rader.map(r=>`<tr>
+        <td>${esc(namn[r.profil]||r.profil)}</td>
+        <td class="h">${pct(r.topp)}</td>
+        <td class="h svag">${pct(r.botten)}</td>
+        <td class="h" style="color:${r.topp_minus_botten>0?'var(--gron)':'var(--rod)'}">
+          <b>${r.topp_minus_botten>0?"+":""}${(r.topp_minus_botten*100).toFixed(1)} pp</b></td>
+        <td class="h svag">${(r.spearman>0?"+":"")+r.spearman.toFixed(3)}</td>
+        <td class="h svag">${r.p_varde.toFixed(3)}</td>
+        <td class="h svag">${r.antal_observationer}</td>
+        <td>${r.godkand? '<span class="pill bra">godkänd</span>'
+                       : '<span class="pill fara">underkänd</span>'}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="varning-ruta" style="margin-top:14px">
+      <b>${rader.length} tester, ${godkanda} godkända.</b>
+      ${godkanda===0? `Ingen av rangordningarna har visat sig kunna skilja framtida vinnare
+        från förlorare i det här universumet. Samtliga har dessutom NEGATIV topp minus botten,
+        alltså gick de lägst rankade bolagen bättre. Det är ett konsekvent mönster, inte slump
+        i en enskild körning.<br><br>
+        Det betyder inte att måtten är påhittade — de har femtio års forskning bakom sig. Det
+        betyder att perioden 2013–2025 i det här universumet gick åt andra hållet, och att
+        tretton år är för kort för att luta sig mot. <b>Slutsatsen för dig är enkel: använd
+        appen för att förstå bolag och undvika uppenbara problem, inte för att välja vinnare.</b>`
+        : ""}
+    </div>
+  </div>`;
+}
+
+async function laddaValidering(){
+  const f = await (await fetch("/api/validering")).json();
+  if(!f || f.finns===false || !f.ar){ return; }
+  const n=f.nollkontroll, d=f.dom;
+  const rad = r => `<tr>
+    <td>${r.ar}</td><td class="h svag">${r.antal}</td>
+    <td class="h">${pct(r.topp_femtedel)}</td>
+    <td class="h svag">${pct(r.botten_femtedel)}</td>
+    <td class="h svag">${pct(r.universum)}</td>
+    <td class="h" style="color:${r.topp_minus_universum>0?'var(--gron)':'var(--rod)'}">
+      ${r.topp_minus_universum>0?"+":""}${pct(r.topp_minus_universum)}</td>
+    <td class="h svag">${r.spearman==null?"–":(r.spearman>0?"+":"")+r.spearman.toFixed(3)}</td></tr>`;
+
+  $("#validering-innehall").innerHTML = tavlaHtml(f.tavla) + `
+  <div class="kort" style="border-color:${d.godkand?'#1d4429':'#5a3a1a'}">
+    <h2>${d.godkand? "Modellen klarade testet" : "Modellen klarade INTE testet"}</h2>
+    <table style="max-width:760px;margin-bottom:12px"><tbody>
+      ${d.krav.map(k=>`<tr><td style="width:26px">${k.uppfyllt
+        ? '<span class="gron">JA</span>':'<span class="rod">NEJ</span>'}</td>
+        <td>${esc(k.krav)}</td><td class="h svag">${esc(k.varde)}</td></tr>`).join("")}
+    </tbody></table>
+    <p style="max-width:80ch">${esc(d.text)}</p>
+  </div>
+
+  <div class="tva">
+    <div class="kort" style="overflow:auto">
+      <h2>År för år</h2>
+      <table><thead><tr><th>År</th><th class="h">Bolag</th><th class="h">Topp 20 %</th>
+        <th class="h">Botten 20 %</th><th class="h">Universum</th><th class="h">Topp−univ</th>
+        <th class="h">Spearman</th></tr></thead>
+      <tbody>${f.ar.map(rad).join("")}
+        <tr style="border-top:2px solid var(--linje)"><td><b>Snitt</b></td><td></td>
+        <td class="h"><b>${pct(f.snitt_topp)}</b></td>
+        <td class="h svag">${pct(f.snitt_botten)}</td>
+        <td class="h svag">${pct(f.snitt_universum)}</td>
+        <td class="h" style="color:${f.snitt_overavkastning>0?'var(--gron)':'var(--rod)'}">
+          <b>${f.snitt_overavkastning>0?"+":""}${pct(f.snitt_overavkastning)}</b></td>
+        <td class="h svag">${(f.snitt_spearman>0?"+":"")+f.snitt_spearman.toFixed(3)}</td></tr>
+      </tbody></table>
+      <div class="minsta svagare" style="margin-top:8px">
+        Poängen sätts varje 30 juni med enbart då publicerad information (SEC:s filing-datum).
+        Avkastningen mäts tolv månader framåt. ${f.antal_observationer} observationer,
+        ${f.antal_ar} år, profil ${esc(f.profil)}${f.med_rapportsignaler?", rapportsignaler medräknade":""}.
+      </div>
+    </div>
+
+    <div class="kort">
+      <h2>Nollkontroll mot slumpen</h2>
+      <p class="liten svag">Samma protokoll, men poängen slumpas. ${n.antal_omgangar} omgångar.
+        Om modellen inte tar sig utanför den här fördelningen har den inte visat något.</p>
+      <div class="nyckel" style="margin-top:10px">
+        <div>Slumpens överavkastning, snitt</div><div>${pct(n.slump_snitt,2)}</div>
+        <div>Slumpens standardavvikelse</div><div>${pct(n.slump_std,2)}</div>
+        <div>Slumpens 95:e percentil</div><div>${pct(n.slump_p95,2)}</div>
+        <div>Slumpens 99:e percentil</div><div>${pct(n.slump_p99,2)}</div>
+        <div><b>Modellens överavkastning</b></div>
+        <div><b style="color:${n.verkligt>n.slump_p95?'var(--gron)':'var(--gul)'}">${pct(n.verkligt,2)}</b></div>
+        <div>Slår så här stor del av slumpen</div><div>${p0(n.percentil)} %</div>
+        <div>p-värde</div><div style="color:${n.p_varde<0.05?'var(--gron)':'var(--rod)'}">${n.p_varde.toFixed(3)}</div>
+      </div>
+      <h3 style="margin-top:16px">Vad som INTE är med i testet</h3>
+      <ul class="liten svag" style="padding-left:18px;margin:0">
+        <li>Svenska bolag — de saknar öppna publiceringsdatum, så de kan inte testas ärligt.</li>
+        <li>Bolag som gick under. Universumet är dagens bolag, vilket gör alla siffror för snälla.</li>
+        <li>Courtage, växlingsavgift, spread och skatt.</li>
+        <li>${f.med_rapportsignaler? "—" : "Rapportsignalerna (kryssa i rutan ovan för att ta med dem)."}</li>
+      </ul>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════ IDAG ════════════════════════════ */
+const NIVAFARG = {undvik:"var(--rod)", las_forst:"var(--gul)", ok:"var(--gron)"};
+
+async function laddaIdag(){
+  const d = await (await fetch("/api/idag")).json();
+  if(!d.finns){ $("#idag-innehall").innerHTML =
+    '<div class="kort"><div class="tom">Kör en skanning först.</div></div>'; return; }
+  $("#kapital").value = d.kapital;
+  $("#spara-kapital").onclick = async()=>{
+    await fetch("/api/installningar",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({kapital_kr: parseFloat($("#kapital").value)||100000})});
+    laddaIdag();
+  };
+
+  const hog = (rader, niva, rubrik, text) => !rader.length ? "" : `
+    <div class="kort" style="border-left:4px solid ${NIVAFARG[niva]}">
+      <h2>${rubrik} <span class="svag" style="font-weight:400;font-size:14px">
+        — ${d.antal_totalt[niva]} bolag</span></h2>
+      <p class="liten svag" style="max-width:86ch">${text}</p>
+      ${rader.map(r=>`<div class="klickbar" data-sym="${esc(r.symbol)}"
+          style="padding:9px 0;border-bottom:1px solid #1c232d">
+        <div class="rad" style="justify-content:space-between">
+          <b>${esc(r.namn)}</b>
+          <span class="minsta svagare">${esc(r.symbol)}${
+            r.dagar_kvar!=null && r.dagar_kvar>=0 && r.dagar_kvar<=14
+              ? ` · rapport om ${r.dagar_kvar} d` : ""}${
+            r.position? ` · max ${Math.round(r.position/1000)} tkr`:""}</span>
+        </div>
+        ${r.skal.map(x=>`<div class="liten svag">${esc(x)}</div>`).join("")}
+        ${r.gor.map(x=>`<div class="liten" style="color:var(--text)">→ ${esc(x)}</div>`).join("")}
+      </div>`).join("")}
+    </div>`;
+
+  $("#idag-innehall").innerHTML =
+    hog(d.undvik, "undvik", "Undvik",
+        "Bolag med akut överlevnadsrisk: utspädning, konkursmått i nödzonen eller " +
+        "går-vidare-tvivel i rapporten. Det här är den enda sortens besked appen har " +
+        "starkt stöd för — måtten mäter finansiell hälsa, inte kursriktning.") +
+    hog(d.las_forst, "las_forst", "Läs innan du gör något",
+        "Något har förändrats: rapporttexten är omskriven, tonläget har mörknat, eller " +
+        "så kommer rapporten inom en vecka. Sorterat efter hur nära rapporten är.") +
+    hog(d.ok, "ok", "Inget hindrar",
+        "Inga varningar, inget omskrivet, ingen rapport inom en vecka. Det betyder INTE " +
+        "att de kommer gå upp — appen kan inte förutsäga det och har testat saken åtta " +
+        "gånger. Det betyder att inget uppenbart talar emot, och att beloppet bredvid är " +
+        "vad positionen bör begränsas till.") +
+    `<div class="kort"><div class="liten svag">Skannat ${esc((d.tid||"").slice(0,16).replace("T"," "))}
+      · ${d.antal_bolag} bolag · kapital ${d.kapital.toLocaleString("sv-SE")} kr.
+      Beloppen är räknade baklänges från vad du tål att förlora: max 10 % i ett bolag,
+      max 15 % av kapitalet vid bolagets värsta historiska fall, max 3 % en rapportdag.</div></div>`;
+
+  $$("#idag-innehall .klickbar").forEach(e=>e.onclick=()=>{
+    $("#case-val").value = e.dataset.sym; visaFlik("case"); ritaCaseFranLista(e.dataset.sym);
+  });
+}
+
+/* ════════════════════════════ INSYN ════════════════════════════ */
+let INSYN = null;
+
+async function laddaInsyn(){
+  if(!INSYN){
+    INSYN = await (await fetch("/api/insyn")).json();
+    ["#in-marknad","#in-vad"].forEach(s=>$(s).onchange=ritaInsyn);
+  }
+  ritaInsyn();
+}
+
+function ritaInsyn(){
+  const d = INSYN;
+  if(!d || !d.finns){ $("#insyn-innehall").innerHTML =
+    '<div class="kort"><div class="tom">Kör en skanning först.</div></div>'; return; }
+  const m = $("#in-marknad").value, vad = $("#in-vad").value;
+  let rader = d.rader.filter(r=>!m || r.marknad===m);
+  if(vad==="tunga") rader = rader.filter(r=>r.tunga_kop>0);
+  rader.sort((a,b)=> vad==="salj" ? (a.netto||0)-(b.netto||0) : (b.netto||0)-(a.netto||0));
+  rader = rader.slice(0,40);
+
+  const mn = v => v==null? "–" : (Math.abs(v)>=1e6
+    ? (v/1e6).toFixed(1)+" mn" : (v/1e3).toFixed(0)+" tkr");
+
+  $("#insyn-innehall").innerHTML = `
+  <div class="kort" style="padding:0;overflow:auto">
+    <table><thead><tr>
+      <th>Bolag</th><th class="h">Köp</th><th class="h">Sälj</th>
+      <th class="h">Netto</th><th class="h">Personer</th>
+      <th class="h" title="Köp av vd, finanschef eller ordförande">Ledningen</th>
+      <th>Vilka</th><th class="h">Senast</th><th class="h">Poäng</th>
+    </tr></thead><tbody>
+    ${rader.map(r=>{
+      const fg = (r.netto||0)>0 ? "var(--gron)" : (r.netto||0)<0 ? "var(--rod)" : "var(--svag)";
+      const extra = [];
+      if(r.antal_storagare) extra.push(`<div class="minsta gul">
+        ${r.antal_storagare} storägartransaktion${r.antal_storagare>1?"er":""},
+        netto ${mn(r.storagarbelopp)} — ägare som ändrar position, inte lön som satsas</div>`);
+      if(r.bortsorterade_program) extra.push(`<div class="minsta svagare">
+        ${r.bortsorterade_program} post${r.bortsorterade_program>1?"er":""} bortsorterade
+        (aktieprogram, optioner, derivat)</div>`);
+      return `<tr class="klickbar" data-sym="${esc(r.symbol)}">
+        <td><b>${esc(r.namn)}</b>
+          <div class="minsta svagare">${esc(r.symbol)} · ${esc(r.marknad)} · ${esc(r.bransch||"")}</div></td>
+        <td class="h">${r.antal_kop||0}</td>
+        <td class="h svag">${r.antal_salj||0}</td>
+        <td class="h" style="color:${fg}"><b>${(r.netto||0)>0?"+":""}${mn(r.netto)}</b>
+          <div class="minsta svagare">${esc(r.valuta||"")}</div></td>
+        <td class="h liten svag">${r.personer_kopt||0} / ${r.personer_salt||0}</td>
+        <td class="h">${r.tunga_kop? `<span class="pill bra">${r.tunga_kop}</span>`:""}</td>
+        <td class="liten svag">${esc((r.tunga_namn||[]).join(", "))}</td>
+        <td class="h liten svag">${esc(r.senaste||"")}</td>
+        <td class="h">${r.poang!=null? `<span style="color:${farg(r.poang)}">${r.poang.toFixed(0)}</span>`:"–"}</td>
+      </tr>` + (extra.length || r.bedomning?.niva==="kop"
+        ? `<tr><td colspan="9" style="padding:0 8px 10px 8px">
+            ${r.bedomning?.niva==="kop"? `<div class="falsi">${esc(r.bedomning.text)}</div>`:""}
+            ${extra.join("")}</td></tr>` : "");
+    }).join("")}
+    </tbody></table>
+  </div>
+  <div class="kort"><div class="liten svag">${rader.length} bolag visas av
+    ${d.rader.length} med anmäld insynshandel. Skannat
+    ${esc((d.tid||"").slice(0,16).replace("T"," "))}.
+    Kolumnen Personer visar hur många som köpt respektive sålt — flera oberoende
+    köpare väger tyngre än en person som köper flera gånger.</div></div>`;
+
+  $$("#insyn-innehall tr.klickbar").forEach(tr=>tr.onclick=()=>{
+    $("#case-val").value = tr.dataset.sym; visaFlik("case"); ritaCaseFranLista(tr.dataset.sym);
+  });
+}
+
+/* ═════════════════════════ OMSKRIVET ═════════════════════════ */
+let OMSKRIVET = null;
+
+async function laddaOmskrivet(){
+  if(!OMSKRIVET){
+    OMSKRIVET = await (await fetch("/api/omskrivet")).json();
+    ["#om-marknad","#om-grupp","#om-antal","#om-sort"].forEach(s=>$(s).onchange=ritaOmskrivet);
+  }
+  ritaOmskrivet();
+}
+
+function ritaOmskrivet(){
+  const d = OMSKRIVET;
+  if(!d || !d.finns){ $("#omskrivet-innehall").innerHTML =
+    '<div class="kort"><div class="tom">Kör en skanning först.</div></div>'; return; }
+
+  const m=$("#om-marknad").value, g=$("#om-grupp").value,
+        n=parseInt($("#om-antal").value), s=$("#om-sort").value;
+  let rader = d.rader.filter(r=>(!m||r.marknad===m)&&(!g||r.grupp===g));
+  const stigande = (s==="percentil_marknad" || s==="likhet");
+  // Längdartefakter hamnar alltid sist. Ett bolag vars textmängd åttafaldigats
+  // får låg likhet av ren matematik och skulle annars toppa listan varje gång,
+  // trots att talet inte betyder något.
+  rader.sort((a,b)=>{
+    if(a.langdvarning !== b.langdvarning) return a.langdvarning ? 1 : -1;
+    return stigande ? (a[s]??999)-(b[s]??999) : (b[s]??-999)-(a[s]??-999);
+  });
+  rader = rader.slice(0,n);
+
+  const td = d.textdom;
+  const medianSv = (d.rader.find(r=>r.marknad==="Sverige")||{}).median_marknad;
+  const medianUs = (d.rader.find(r=>r.marknad==="USA")||{}).median_marknad;
+
+  const rad = r => {
+    const f = r.likhet<0.85 ? "var(--rod)" : r.likhet<0.92 ? "var(--gul)"
+            : r.likhet<0.97 ? "var(--bla)" : "var(--svag)";
+    const forkl = (r.forklaring||[]).filter(x=>x.vikt>0).map(x=>{
+      const fg = x.vikt>=3? "var(--rod)" : x.vikt===2? "var(--gul)" : "var(--gron)";
+      return `<div style="border-left:3px solid ${fg};padding:3px 0 3px 10px;margin-bottom:5px">
+        ${esc(x.text)}</div>`;}).join("");
+    const varning = r.langdvarning
+      ? `<div class="varnkort" style="margin-bottom:6px"><b>Längdvarning.</b> Texten är
+         ${Math.abs(r.langdforandring*100).toFixed(0)} % ${r.langdforandring>0?"längre":"kortare"}
+         än förra gången. När textmängden ändras så mycket sjunker likheten av ren matematik —
+         talet säger då mer om att avsnittet avgränsats olika än om att bolaget skrivit om.</div>`
+      : "";
+    const nya = (r.nya_risker_text||[]).map(t=>
+      `<div class="falsi" style="margin-bottom:5px">
+         <div class="minsta svagare">nytt riskstycke</div>${esc(t)}…</div>`).join("");
+    const flaggor = (r.flaggor||[]).length
+      ? `<div class="liten gul">Röda flaggor: ${r.flaggor.map(esc).join(" · ")}</div>` : "";
+    return `<tr class="klickbar" data-sym="${esc(r.symbol)}">
+      <td><b>${esc(r.namn)}</b>
+        <div class="minsta svagare">${esc(r.symbol)} · ${esc(r.marknad)} · ${esc(r.kalla)}</div></td>
+      <td class="liten svag">${esc(r.bransch||"")}</td>
+      <td class="h"><b style="color:${f}">${r.likhet.toFixed(3)}</b>
+        <div class="minsta svagare">${esc(r.vad)}</div></td>
+      <td class="h liten svag">${r.percentil_marknad.toFixed(0)}%</td>
+      <td class="liten" style="color:${f}">${esc(r.tolkning||"")}</td>
+      <td class="h liten">${r.langdforandring!=null
+        ? `<span class="${r.langdvarning?"gul":""}" title="${r.langdvarning
+            ? "Texten har ändrat längd så mycket att likheten inte är jämförbar" : ""}">${
+            r.langdforandring>0?"+":""}${(r.langdforandring*100).toFixed(0)} %</span>` : "–"}</td>
+      <td class="h">${r.nya_risker||0}</td>
+      <td class="h">${r.negativa_forandring!=null
+        ? `<span style="color:${r.negativa_forandring>0.3?"var(--rod)":r.negativa_forandring<-0.3?"var(--gron)":"var(--svag)"}">${
+            r.negativa_forandring>0?"+":""}${r.negativa_forandring.toFixed(2)}</span>` : "–"}</td>
+      <td class="h">${r.flaggvikt? `<span class="pill ${r.flaggvikt>=6?"fara":"varn"}">${r.flaggvikt}</span>`:""}</td>
+      <td class="h liten svag">${esc(r.rapportdatum||"")}</td>
+      <td class="h">${r.poang!=null? `<span style="color:${farg(r.poang)}">${r.poang.toFixed(0)}</span>`:"–"}</td>
+    </tr>` + (forkl||varning||nya||flaggor
+      ? `<tr><td colspan="11" style="padding:0 8px 12px 8px">${varning}${forkl}${nya}${flaggor}</td></tr>`
+      : "");
+  };
+
+  $("#omskrivet-innehall").innerHTML = `
+  <div class="varning-ruta">
+    <b>Läs det här först.</b> Signalen är testad i den här appen och den föll:
+    ${td? `topp minus botten <b>${(td.topp_minus_botten*100).toFixed(1)} procentenheter</b>,
+      p = ${td.p_varde.toFixed(3)} mot slumpen, ${td.antal_observationer} observationer.`
+      : "se Validering-fliken."}
+    En kraftigt omskriven rapport är alltså <b>ingen säljsignal</b>. Använd listan som en
+    <b>läslista</b>: de här bolagen har själva bedömt att något förändrats så pass att texten
+    behövde skrivas om — gå och läs vad.
+  </div>
+
+  <div class="kort" style="padding:0;overflow:auto">
+    <table><thead><tr>
+      <th>Bolag</th><th>Bransch</th><th class="h">Likhet</th>
+      <th class="h" title="Percentil inom marknaden">Perc.</th>
+      <th>Tolkning</th><th class="h" title="Hur mycket längre eller kortare texten blev">Längd</th>
+      <th class="h">Nya risker</th>
+      <th class="h" title="Förändring i andel negativa ord mot förra rapporten">Ton</th>
+      <th class="h">Flaggor</th><th class="h">Rapport</th><th class="h">Poäng</th>
+    </tr></thead><tbody>${rader.map(rad).join("")}</tbody></table>
+  </div>
+
+  <div class="kort">
+    <h3>Så ska talen läsas</h3>
+    <div class="nyckel" style="max-width:700px">
+      <div>Medianlikhet, svenska bolag</div><div>${medianSv!=null? medianSv.toFixed(3):"–"}</div>
+      <div>Medianlikhet, amerikanska bolag</div><div>${medianUs!=null? medianUs.toFixed(3):"–"}</div>
+      <div>Bolag i listan</div><div>${d.antal}</div>
+    </div>
+    <p class="liten svag" style="max-width:86ch;margin-top:10px">Skillnaden betyder inte att
+      svenska bolag ändrar mer. En svensk delårsrapport är 20–50 sidor och varierar naturligt
+      mellan kvartal; en amerikansk 10-K är 200 sidor mall som ändras marginellt. Därför
+      rangordnas bolagen <b>inom sin egen marknad</b> som standard — percentil 0 % betyder mest
+      omskrivet av alla med samma sorts rapport.</p>
+    ${(d.ej_jamforbara||[]).length? `<h3 style="margin-top:16px">Uteslutna: ${d.ej_jamforbara.length} bolag</h3>
+      <p class="liten svag" style="max-width:86ch">Likhet under 0,30 betyder inte att rapporten
+      skrivits om — det betyder att texterna inte är jämförbara. Nästan alltid olika språk mellan
+      åren, eller en PDF som inte gick att textextrahera. De hade annars ockuperat hela toppen av
+      listan som rena mätfel.</p>
+      <div class="liten svag">${d.ej_jamforbara.map(x=>esc(x.namn)+" ("+x.likhet.toFixed(3)+")").join(" · ")}</div>`
+      : ""}
+  </div>`;
+
+  $$("#omskrivet-innehall tr.klickbar").forEach(tr=>tr.onclick=()=>{
+    $("#case-val").value = tr.dataset.sym; visaFlik("case"); ritaCaseFranLista(tr.dataset.sym);
+  });
+}
+
+/* ═══════════════════════════ HJÄLP ═══════════════════════════ */
+let HJALP = null;
+
+async function laddaHjalp(){
+  HJALP = await (await fetch("/api/hjalp")).json();
+  $("#hjalp-innehall").dataset.laddad = "1";
+  $("#ordsok").oninput = ritaHjalp;
+  ritaHjalp();
+}
+
+function ritaHjalp(){
+  if(!HJALP) return;
+  const sok = ($("#ordsok").value||"").toLowerCase().trim();
+  const trafflista = HJALP.ord.filter(o=> !sok ||
+    (o.term+" "+o.kort+" "+o.lang+" "+(o.kalla||"")).toLowerCase().includes(sok));
+
+  const stegHtml = sok? "" : `
+  <div class="kort">
+    <h2>Så gör du, steg för steg</h2>
+    <p class="liten svag">Har du aldrig använt appen förut: gör de här sju sakerna i
+      ordning. Det tar tio minuter första gången.</p>
+    ${HJALP.steg.map(s=>`
+      <div style="display:grid;grid-template-columns:34px 1fr;gap:12px;margin-bottom:14px">
+        <div style="width:28px;height:28px;border-radius:50%;background:#1f6feb;color:#fff;
+          display:flex;align-items:center;justify-content:center;font-weight:600">${s.nr}</div>
+        <div>
+          <b>${esc(s.rubrik)}</b>
+          <div style="margin-top:3px;max-width:78ch">${s.text}</div>
+          ${s.tips? `<div class="falsi" style="margin-top:7px"><b>Tips:</b> ${esc(s.tips)}</div>`:""}
+        </div>
+      </div>`).join("")}
+  </div>
+
+  <div class="varning-ruta">
+    <b>Tre saker att veta innan du börjar.</b>
+    <div style="margin-top:6px">1. Appen är ett räkneverktyg, inte rådgivning. Alla beslut
+    är dina egna.<br>
+    2. Enskilda aktier är mycket mer riskfyllda än en bred fond. Ett enskilt bolag kan
+    förlora hela sitt värde — Ericsson har fallit 98 % en gång, och det kan hända igen.<br>
+    3. Appens rangordning har testats mot verkligheten och klarade inte testet. Läs
+    Validering-fliken. Det som verktyget är BRA på är att visa vilka bolag du bör
+    undvika, och vad som står i rapporterna.</div>
+  </div>`;
+
+  const perGrupp = {};
+  trafflista.forEach(o=>{(perGrupp[o.grupp] ||= []).push(o);});
+
+  const ordHtml = HJALP.grupper.filter(g=>perGrupp[g]).map(g=>`
+    <div class="kort">
+      <h2>${esc(g)}</h2>
+      ${perGrupp[g].map(o=>`
+        <div style="padding:12px 0;border-bottom:1px solid #1c232d">
+          <div class="rad" style="justify-content:space-between;align-items:baseline">
+            <b style="font-size:15px">${esc(o.term)}</b>
+            ${o.kalla? `<span class="pill">${esc(o.kalla)}</span>`:""}
+          </div>
+          <div class="svag" style="margin:2px 0 6px">${esc(o.kort)}</div>
+          <div style="max-width:82ch">${esc(o.lang)}</div>
+          ${o.tolka?.length? `<table style="max-width:560px;margin-top:8px"><tbody>
+            ${o.tolka.map(t=>`<tr><td style="width:150px"><code>${esc(t[0])}</code></td>
+              <td class="liten svag">${esc(t[1])}</td></tr>`).join("")}
+          </tbody></table>`:""}
+          ${o.fallgrop? `<div class="varnkort" style="margin-top:8px">
+            <b>Fallgrop:</b> ${esc(o.fallgrop)}</div>`:""}
+        </div>`).join("")}
+    </div>`).join("");
+
+  const versionsHtml = sok || !VERSION ? "" : `
+  <div class="kort" id="versionshistorik">
+    <h2>Version ${esc(VERSION.version)} — ${esc(VERSION.datum)}</h2>
+    <p class="liten svag">Kör du rätt version? Jämför numret här med det i sidhuvudet på
+      den dator du undrar över. Mappen appen körs ur:
+      <code>${esc(VERSION.mapp||"")}</code></p>
+    ${VERSION.skanning_tid? `<p class="liten svag">Senaste skanningen:
+      <b>${esc(VERSION.skanning_tid.slice(0,16).replace("T"," "))}</b>,
+      ${VERSION.antal_bolag} bolag. Siffrorna i appen är från det tillfället —
+      tryck <b>Kör ny skanning</b> i Jakt-fliken för färska.</p>`:""}
+    <h3 style="margin-top:14px">Vad som ändrats</h3>
+    ${(VERSION.nyheter||[]).map(n=>`
+      <div style="display:grid;grid-template-columns:64px 1fr;gap:10px;margin-bottom:9px">
+        <div><span class="pill">v${esc(n.version)}</span></div>
+        <div><div class="minsta svagare">${esc(n.datum)}</div>${esc(n.text)}</div>
+      </div>`).join("")}
+  </div>`;
+
+  const stodHtml = sok || !VERSION?.stod_bmac ? "" : `
+  <div class="kort" style="border-color:#5a3a1a">
+    <h2>☕ Stöd</h2>
+    <p style="max-width:80ch">Börscase är gratis och kommer att förbli det. Ingen
+      inloggning, inga API-nycklar, ingen data som skickas någonstans, inga funktioner
+      bakom betalvägg. Har den varit till nytta får du gärna bjuda på en kaffe — det
+      betalar för tiden, inget annat.</p>
+    <div class="rad" style="margin-top:12px">
+      <a href="${esc(VERSION.stod_bmac)}" target="_blank" rel="noopener"
+         style="padding:9px 16px;border-radius:6px;background:#ffdd00;color:#000;
+                text-decoration:none;font-weight:600">☕ Buy Me a Coffee</a>
+      ${VERSION.stod_paypal? `<a href="${esc(VERSION.stod_paypal)}" target="_blank"
+         rel="noopener" style="padding:9px 16px;border-radius:6px;background:#1f6feb;
+         color:#fff;text-decoration:none;font-weight:600">PayPal</a>`:""}
+    </div>
+    <p class="liten svag" style="margin-top:12px;max-width:80ch">En donation är en gåva,
+      inte ett köp. Den ger inga extra funktioner, ingen support och inga rättigheter —
+      och den ändrar ingenting i vad appen visar. Skulle den göra det vore appen inte
+      värd att lita på.</p>
+  </div>`;
+
+  $("#hjalp-innehall").innerHTML = versionsHtml + stodHtml + stegHtml + (trafflista.length
+    ? (sok? `<div class="liten svag" style="margin-bottom:8px">${trafflista.length}
+        träffar på "${esc(sok)}"</div>`:"") + ordHtml
+    : `<div class="kort"><div class="tom">Inget ord matchar "${esc(sok)}".</div></div>`);
+}
+
+/* ═══════════════════════════ METOD ═══════════════════════════ */
+async function laddaMetod(){
+  const d = await (await fetch("/api/metod")).json();
+  const perPelare={};
+  d.matt.forEach(m=>{(perPelare[m.pelare] ||= []).push(m);});
+  $("#metod-innehall").innerHTML = `
+  <div class="kort">
+    <h1>Så räknar appen</h1>
+    <p style="max-width:80ch">Varje mått nedan är publicerat och prövat av någon annan än den här
+      appen. Det är avsiktligt: en modell full av egna formler kan alltid fås att se bra ut på
+      historisk data. Måtten rangordnas mot alla andra bolag i skanningen (percentil 0–100),
+      grupperas i pelare, och vägs ihop enligt vald profil. Bolag där stora delar av modellen
+      saknar data får en lägre <b>täckning</b> — det talet ska läsas tillsammans med poängen.</p>
+    <div class="varning-ruta" style="margin-top:14px">
+      Poängen är ingen köprekommendation och ingen prognos. Se fliken <b>Validering</b> för vad
+      den faktiskt har och inte har visat sig kunna. Det här är ett räkneverktyg, inte
+      finansiell rådgivning. Enskilda aktier kan förlora hela sitt värde.
+    </div>
+  </div>
+
+  ${Object.entries(perPelare).map(([namn,matt])=>`
+  <div class="kort"><h2>${esc(namn)}</h2>
+    <table><thead><tr><th>Mått</th><th class="h">Riktning</th><th class="h">Vikt</th>
+      <th>Vad det betyder</th></tr></thead><tbody>
+      ${matt.map(m=>`<tr><td><b>${esc(m.etikett)}</b>
+        <div class="minsta svagare">${esc(m.falt)}</div></td>
+        <td class="h liten">${m.riktning>0?'högre bättre':'lägre bättre'}</td>
+        <td class="h">${m.vikt}</td>
+        <td class="liten svag">${esc((m.text||"").replace("{v}","…"))}</td></tr>`).join("")}
+    </tbody></table></div>`).join("")}
+
+  <div class="kort"><h2>Profilernas vikter</h2>
+    <table><thead><tr><th>Profil</th>${PELARE.map(p=>`<th class="h">${p}</th>`).join("")}</tr></thead>
+    <tbody>${Object.entries(d.profiler).map(([namn,v])=>`<tr><td>${esc(namn)}</td>
+      ${PELARE.map(p=>`<td class="h">${v[p]!=null? v[p] : '<span class="svagare">–</span>'}</td>`).join("")}
+    </tr>`).join("")}</tbody></table></div>
+
+  <div class="kort"><h2>Avdrag</h2>
+    <p class="liten svag">Dras direkt från poängen, inte via percentil. En varning ska inte kunna
+      vägas upp av en fin marginal.</p>
+    ${d.varningar.map(v=>`<div class="varnkort ${v.avdrag>=10?'fara':''}">
+      <b>${esc(v.rubrik)}</b> <span class="pill fara">−${v.avdrag}</span>
+      <div class="liten svag" style="margin-top:4px">${esc(v.forklaring)}</div></div>`).join("")}
+  </div>
+
+  <div class="kort"><h2>Formuleringar som flaggas i rapporttexten</h2>
+    <table><thead><tr><th class="h" style="width:50px">Vikt</th><th>Betydelse</th>
+      <th>Sökmönster</th></tr></thead><tbody>
+      ${d.flaggor.map(f=>`<tr><td class="h">${f.vikt}</td><td>${esc(f.forklaring)}</td>
+        <td><code>${esc(f.monster)}</code></td></tr>`).join("")}
+    </tbody></table></div>
+
+  <div class="kort"><h2>Källorna</h2>
+    <div class="nyckel" style="max-width:640px">
+      <div>Amerikanska bokslut, 10–20 år</div><div>SEC EDGAR XBRL (med publiceringsdatum)</div>
+      <div>Amerikanska årsredovisningar</div><div>SEC EDGAR, 10-K och 20-F i fulltext</div>
+      <div>Svenska bokslut, 4–5 år</div><div>Yahoo Finance</div>
+      <div>Kurser och börsvärden</div><div>Yahoo Finance</div>
+    </div>
+    <p class="liten svag" style="margin-top:10px">Allt hämtas till din egen dator och cachas i
+      mappen <code>cache/</code>. Ingenting skickas vidare någonstans. Yahoo Finance är ett
+      inofficiellt gränssnitt utan garantier — kontrollera alltid en siffra som ska ligga till
+      grund för ett beslut mot bolagets egen rapport.</p>
+  </div>`;
+  $("#metod-innehall").dataset.laddad = "1";
+}
+
+/* ═════════════════════════ version ═════════════════════════ */
+let VERSION = null;
+
+async function laddaVersion(){
+  try{ VERSION = await (await fetch("/api/version?t="+Date.now())).json(); }
+  catch(e){ return; }
+  const v = VERSION;
+  const skannad = v.skanning_tid
+    ? v.skanning_tid.slice(0,16).replace("T"," ") : "ingen skanning";
+  // Datum utan tid, för jämförelse mot idag.
+  const idag = new Date().toISOString().slice(0,10);
+  const dagar = v.skanning_tid
+    ? Math.round((new Date(idag) - new Date(v.skanning_tid.slice(0,10)))/86400000) : null;
+  const farg = dagar==null ? "var(--rod)" : dagar<=7 ? "var(--gron)"
+             : dagar<=31 ? "var(--gul)" : "var(--rod)";
+  $("#versionslapp").innerHTML =
+    `v${esc(v.version)} · <span style="color:${farg}">data ${esc(skannad)}${
+      dagar!=null && dagar>0 ? ` (${dagar} d gammal)` : ""}</span> · ${v.antal_bolag} bolag`;
+  if(v.stod_bmac){
+    const l = $("#stodlank");
+    l.href = v.stod_bmac;
+    l.style.display = "inline-block";
+    l.title = "Appen är gratis och kommer alltid vara det. Gillar du den får du "
+            + "gärna bjuda på en kaffe.";
+  }
+  $("#versionslapp").title = "Programmappen: " + (v.mapp||"");
+  $("#versionslapp").style.cursor = "pointer";
+  $("#versionslapp").onclick = ()=>{ visaFlik("hjalp");
+    setTimeout(()=>{ const e=document.querySelector("#versionshistorik");
+      if(e) e.scrollIntoView({behavior:"smooth"}); }, 400); };
+}
+
+/* ═══════════════════════════ start ═══════════════════════════ */
+// Idag är förstasidan och måste laddas direkt — den visas ju redan när sidan
+// öppnas, till skillnad från flikarna som laddas när man klickar på dem.
+laddaVersion();
+laddaSkanning().then(laddaIdag);
+fetch("/api/status").then(r=>r.json()).then(s=>{
+  if(s.kor){ knappar(true);
+    poll(s.vad, $(s.vad==="validering"?"#status-validering":"#status-jakt"),
+         s.vad==="validering"? laddaValidering : laddaSkanning); }
+});
+</script>
+</body>
+</html>

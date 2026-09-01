@@ -1,0 +1,6 @@
+yfinance>=0.2.40
+pandas>=2.0
+numpy>=1.24
+flask>=3.0
+# Frivilligt: behovs bara for att lasa PDF-arsredovisningar i fliken Rapport.
+pypdf>=4.0

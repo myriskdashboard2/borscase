@@ -1,0 +1,514 @@
+<title>Nio underkännanden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Serif:wght@600;700&display=swap">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   Provprotokollet — ett medvetet enfärgsvärld. Presentationen ska filmas,
+   och en bild som byter utseende med tittarens systeminställning går inte
+   att spela in. Därför målas varje yta explicit, ingen ärvs.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --black:#0B1211;        /* bläck, blågrön dragning — inte neutralt grått */
+  --black-2:#111B19;
+  --paper:#DDE3E6;        /* kall pappersgrå, som en termoutskrift */
+  --paper-dim:#9AA8AC;
+  --paper-faint:#5A6A6E;
+  --stamp:#B33A2B;        /* stämpelröd */
+  --stamp-soft:#7A2A20;
+  --measured:#4A7C59;     /* dämpad mätgrön */
+  --brass:#D4A24C;        /* mässing, för tal */
+  --rule:#22302E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--black);
+  color:var(--paper);
+  font-family:"IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
+  font-weight:300;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* Fint rutnät i bakgrunden — labbjournalens papper */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--rule) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+  background-size:64px 64px;opacity:.35;
+}
+
+/* ── spalten till vänster: provnummer, som i en labbjournal ───────────── */
+.spine{
+  position:fixed;left:0;top:0;bottom:0;width:88px;z-index:5;
+  border-right:1px solid var(--rule);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;padding:28px 0;
+  background:var(--black);
+}
+.spine .marke{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;
+  color:var(--paper-faint);writing-mode:vertical-rl;text-orientation:mixed;
+}
+.spine .nr{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--brass);
+  font-variant-numeric:tabular-nums;
+}
+.spine .streck{width:1px;flex:1;background:var(--rule);margin:18px 0}
+
+/* ── bilderna ─────────────────────────────────────────────────────────── */
+.bild{
+  position:fixed;inset:0 0 0 88px;z-index:1;
+  display:none;flex-direction:column;justify-content:center;
+  padding:clamp(28px,5vw,80px) clamp(28px,6vw,110px);
+  opacity:0;
+  /* Sista utvagen om fonstret ar mycket lagt: hellre en scrollbar an text
+     som klipps bort mitt i en mening. Pa normala skarmar rors den aldrig. */
+  overflow-y:auto;
+}
+.bild.pa{display:flex;animation:in .5s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .bild.pa{animation:none;opacity:1}
+}
+
+.ogonbryn{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--paper-faint);margin-bottom:22px;
+}
+h1{
+  font-family:"IBM Plex Serif",Georgia,serif;font-weight:700;
+  font-size:clamp(38px,6.4vw,86px);line-height:1.02;letter-spacing:-.02em;
+  text-wrap:balance;max-width:19ch;
+}
+h2{
+  font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;
+  font-size:clamp(28px,3.8vw,50px);line-height:1.1;letter-spacing:-.015em;
+  text-wrap:balance;max-width:24ch;margin-bottom:26px;
+}
+p.ingress{font-size:clamp(17px,1.5vw,22px);line-height:1.55;max-width:60ch;color:var(--paper-dim)}
+p.ingress strong{color:var(--paper);font-weight:500}
+.mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+
+/* ── titelbilden ──────────────────────────────────────────────────────── */
+.titel-rad{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:34px}
+.titel-rad .namn{
+  font-family:"IBM Plex Mono",monospace;font-size:14px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--brass);
+}
+.titel-rad .ver{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--paper-faint)}
+.underrad{
+  margin-top:40px;padding-top:24px;border-top:1px solid var(--rule);
+  display:flex;gap:52px;flex-wrap:wrap;
+}
+.underrad div{display:flex;flex-direction:column;gap:5px}
+.underrad .tal{
+  font-family:"IBM Plex Mono",monospace;font-size:clamp(22px,2.6vw,34px);
+  color:var(--paper);font-variant-numeric:tabular-nums;
+}
+.underrad .txt{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-faint)}
+
+/* ── protokolltabellen: nio prov ──────────────────────────────────────── */
+.tabellyta{overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
+.protokoll{width:100%;border-collapse:collapse;margin-top:8px;
+  font-size:clamp(12px,1.05vw,15px)}
+.protokoll th{
+  text-align:left;font-family:"IBM Plex Mono",monospace;font-weight:500;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--paper-faint);padding:0 14px 12px 0;border-bottom:1px solid var(--rule);
+}
+.protokoll td{padding:8px 14px 8px 0;border-bottom:1px solid rgba(34,48,46,.55)}
+.protokoll td.h{text-align:right;font-family:"IBM Plex Mono",monospace;
+  font-variant-numeric:tabular-nums;color:var(--paper)}
+.protokoll td.varde{color:var(--stamp);font-weight:500}
+.protokoll tr{opacity:0;animation:radin .34s ease forwards}
+@keyframes radin{to{opacity:1}}
+.stampel{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;
+  letter-spacing:.16em;padding:3px 9px;border:1.5px solid var(--stamp);
+  color:var(--stamp);transform:rotate(-1.6deg);
+}
+
+/* ── siffran som byter tecken ─────────────────────────────────────────── */
+.vandning{display:flex;align-items:center;gap:clamp(24px,5vw,70px);flex-wrap:wrap;margin:26px 0 30px}
+.vandning .ruta{
+  border:1px solid var(--rule);padding:26px 34px;min-width:250px;
+  background:var(--black-2);
+}
+.vandning .etikett{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--paper-faint);margin-bottom:12px;
+}
+.vandning .siffra{
+  font-family:"IBM Plex Mono",monospace;font-size:clamp(40px,6vw,74px);
+  font-weight:500;font-variant-numeric:tabular-nums;line-height:1;
+}
+.vandning .gron{color:var(--measured)}
+.vandning .rod{color:var(--stamp)}
+.vandning .pil{font-size:32px;color:var(--paper-faint)}
+.vandning .villkor{font-size:13px;color:var(--paper-dim);margin-top:10px}
+.dold{opacity:0;transform:translateX(-10px);transition:opacity .5s ease,transform .5s ease}
+.dold.syns{opacity:1;transform:none}
+
+/* ── kort och listor ──────────────────────────────────────────────────── */
+.kort-rad{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+  gap:clamp(14px,1.6vw,24px);margin-top:12px}
+.kort{border:1px solid var(--rule);padding:22px;background:var(--black-2)}
+.kort h3{font-family:"IBM Plex Serif",serif;font-size:18px;font-weight:600;margin-bottom:9px}
+.kort p{font-size:14px;line-height:1.5;color:var(--paper-dim)}
+.kort .tal{font-family:"IBM Plex Mono",monospace;font-size:27px;color:var(--brass);
+  display:block;margin-bottom:7px;font-variant-numeric:tabular-nums}
+
+.citat{
+  border-left:2px solid var(--brass);padding:4px 0 4px 22px;margin:26px 0;
+  font-family:"IBM Plex Serif",serif;font-size:clamp(19px,2vw,27px);line-height:1.4;
+  max-width:34ch;
+}
+.lista{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:14px;max-width:66ch}
+.lista li{display:grid;grid-template-columns:26px 1fr;gap:14px;align-items:start;
+  font-size:clamp(15px,1.35vw,18px);line-height:1.5;color:var(--paper-dim)}
+.lista li .m{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--brass);
+  padding-top:4px}
+.lista li strong{color:var(--paper);font-weight:500}
+
+/* ── kaffe ────────────────────────────────────────────────────────────── */
+.kaffe{display:inline-flex;align-self:flex-start;align-items:center;gap:11px;margin-top:30px;
+  padding:14px 26px;background:var(--brass);color:#161206;text-decoration:none;
+  font-weight:600;font-size:16px}
+.kaffe:hover{filter:brightness(1.08)}
+
+/* ── navigering ───────────────────────────────────────────────────────── */
+.nav{position:fixed;right:26px;bottom:22px;z-index:6;display:flex;align-items:center;gap:14px}
+.nav button{
+  background:transparent;border:1px solid var(--rule);color:var(--paper-dim);
+  width:36px;height:32px;cursor:pointer;font-size:15px;font-family:inherit;
+}
+.nav button:hover{border-color:var(--brass);color:var(--brass)}
+.nav button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.nav .rakn{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--paper-faint);
+  font-variant-numeric:tabular-nums}
+.matare{position:fixed;left:88px;right:0;top:0;height:2px;background:var(--rule);z-index:6}
+.matare i{display:block;height:100%;background:var(--brass);transition:width .4s ease}
+.hint{position:fixed;left:110px;bottom:24px;z-index:6;font-family:"IBM Plex Mono",monospace;
+  font-size:11px;letter-spacing:.1em;color:var(--paper-faint)}
+
+@media (max-height:720px){
+  h1{font-size:clamp(30px,4.6vh,52px)}
+  h2{font-size:clamp(23px,3.4vh,36px);margin-bottom:16px}
+  p.ingress{font-size:clamp(14px,2vh,17px);line-height:1.45}
+  .underrad{margin-top:24px;padding-top:16px;gap:34px}
+  .underrad .tal{font-size:clamp(18px,2.8vh,26px)}
+  .kort{padding:16px}
+  .kort p{font-size:13px}
+  .kort .tal{font-size:22px}
+  .citat{font-size:clamp(16px,2.6vh,21px);margin:16px 0}
+  .lista{gap:9px;margin-top:14px}
+  .lista li{font-size:clamp(13px,1.9vh,16px)}
+  .vandning{margin:16px 0 18px}
+  .vandning .ruta{padding:16px 22px}
+  .vandning .siffra{font-size:clamp(30px,7vh,56px)}
+  .ogonbryn{margin-bottom:12px}
+  .protokoll td{padding:6px 12px 6px 0}
+}
+@media (max-height:520px){
+  .protokoll{font-size:12px}
+  .protokoll td{padding:4px 10px 4px 0}
+  h2{font-size:clamp(20px,3vh,28px)}
+}
+@media (max-width:720px){
+  .spine{width:52px}.bild{inset:0 0 0 52px}.matare{left:52px}.hint{display:none}
+}
+</style>
+
+<div class="matare"><i id="matare-fyll" style="width:0"></i></div>
+
+<div class="spine">
+  <div class="marke">PROVPROTOKOLL</div>
+  <div class="streck"></div>
+  <div class="nr" id="spine-nr">01</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ 1. TITEL ── -->
+<section class="bild pa">
+  <div class="titel-rad">
+    <span class="namn">Börscase</span>
+    <span class="ver">v1.12 · 2026</span>
+  </div>
+  <h1>Ett verktyg som underkände sig självt nio gånger</h1>
+  <p class="ingress" style="margin-top:26px">
+    Det läser 217 bolags årsredovisningar, räknar fyrtio nyckeltal och mäter vad
+    ledningen gör med sina egna pengar. Sedan testar det om något av det
+    <strong>faktiskt förutsäger någonting</strong> — och redovisar svaret även när
+    svaret är nej.
+  </p>
+  <div class="underrad">
+    <div><span class="tal">217</span><span class="txt">bolag</span></div>
+    <div><span class="tal">215</span><span class="txt">rapporter lästa</span></div>
+    <div><span class="tal">106 403</span><span class="txt">insynstransaktioner</span></div>
+    <div><span class="tal">9</span><span class="txt">genomförda test</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ 2. VAD DEN GÖR ── -->
+<section class="bild">
+  <div class="ogonbryn">Vad den gör</div>
+  <h2>Den läser rapporten, inte bara siffrorna</h2>
+  <div class="kort-rad">
+    <div class="kort">
+      <h3>Språkförändring</h3>
+      <p>Hur mycket bolaget skrivit om sitt riskavsnitt sedan i fjol, mätt som
+         cosinuslikhet. Intel ligger på <span class="mono">0,69</span> —
+         medianbolaget på <span class="mono">0,99</span>.</p>
+    </div>
+    <div class="kort">
+      <h3>Tonläge</h3>
+      <p>Andelen negativa ord, med Loughran–McDonalds finanslexikon. Oracle gick
+         från <span class="mono">0,7 %</span> till <span class="mono">4,8 %</span>
+         på ett år.</p>
+    </div>
+    <div class="kort">
+      <h3>Röda flaggor</h3>
+      <p>Formuleringar som betyder något exakt: <em>going concern</em>,
+         <em>material weakness</em>, kontrollbalansräkning. Med negationsfilter,
+         annars tänds de för alla.</p>
+    </div>
+    <div class="kort">
+      <h3>Nya riskstycken</h3>
+      <p>Vilka stycken som inte fanns i fjolårets rapport. Bolagets egna,
+         juridiskt granskade ord om vad som förändrats.</p>
+    </div>
+  </div>
+  <p class="ingress" style="margin-top:30px">
+    Svenska rapporter hämtas som PDF via MFN, amerikanska som 10-K direkt från SEC.
+    <strong>Allt körs lokalt.</strong> Ingen inloggning, inga API-nycklar, ingen data
+    som lämnar datorn.
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 3. PROTOKOLLET ── -->
+<section class="bild">
+  <div class="ogonbryn">Det ovanliga</div>
+  <h2>Den försöker motbevisa sig själv</h2>
+  <p class="ingress">
+    Varje 30 juni bakåt i tiden ställs frågan: hur hade modellen rangordnat bolagen
+    med <strong>enbart den information som var publicerad då</strong>? SEC:s
+    XBRL-data innehåller inlämningsdatum för varje siffra, så det går att göra på
+    riktigt. Sedan mäts avkastningen tolv månader framåt.
+  </p>
+  <ul class="lista">
+    <li><span class="m">01</span><span><strong>Point-in-time.</strong> Ett bokslut
+      för 2019 som lämnades in i februari 2020 finns inte i universumet i juni 2019.</span></li>
+    <li><span class="m">02</span><span><strong>Ojusterade kurser för börsvärdet.</strong>
+      Använder man justerade blir gamla P/E-tal fel med exakt splitfaktorn.</span></li>
+    <li><span class="m">03</span><span><strong>Nollkontroll.</strong> Samma protokoll
+      med slumpmässiga poäng, 300 omgångar. Ryms resultatet i turen får det inte
+      kallas något annat.</span></li>
+    <li><span class="m">04</span><span><strong>Kraven sätts i förväg</strong>, inte
+      efter att resultatet setts.</span></li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════ 4. RESULTATTAVLAN ── -->
+<section class="bild" data-anim="protokoll">
+  <div class="ogonbryn">Resultat</div>
+  <h2 style="margin-bottom:18px">Nio prov. Noll godkända.</h2>
+  <div class="tabellyta">
+  <table class="protokoll">
+    <thead><tr>
+      <th style="width:40%">Vad som testades</th>
+      <th class="h" style="text-align:right">Topp − botten</th>
+      <th class="h" style="text-align:right">p mot slumpen</th>
+      <th style="text-align:right">Dom</th>
+    </tr></thead>
+    <tbody id="protokoll-kropp"></tbody>
+  </table>
+  </div>
+  <p class="ingress" style="margin-top:24px;font-size:17px">
+    <strong>Samtliga negativa.</strong> De lägst rankade bolagen gick bättre än de
+    högst rankade — i varje enskild variant. Ett slumpmässigt misslyckande hade
+    gett spridning kring noll, inte nio negativa i rad.
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════════════ 5. VÄNDNINGEN ── -->
+<section class="bild" data-anim="vandning">
+  <div class="ogonbryn">Varför man måste testa om</div>
+  <h2>Samma modell. Samma protokoll. Sjuttio bolag till.</h2>
+  <div class="vandning">
+    <div class="ruta">
+      <div class="etikett">83 storbolag</div>
+      <div class="siffra gron">+4,5</div>
+      <div class="villkor">procentenheter per år · 11 av 13 år över index</div>
+    </div>
+    <div class="pil dold" id="vand-pil">⟶</div>
+    <div class="ruta dold" id="vand-ruta">
+      <div class="etikett">Efter halvledarna och AI-bolagen</div>
+      <div class="siffra rod">−3,7</div>
+      <div class="villkor">procentenheter per år · sämre än slumpen i nio fall av tio</div>
+    </div>
+  </div>
+  <p class="ingress">
+    Ett resultat som byter tecken när man lägger till bolag var aldrig ett resultat.
+    <strong>Utan det andra testet hade appen sagt att den fungerar.</strong>
+  </p>
+</section>
+
+<!-- ═════════════════════════════════════════════════ 6. BUGGEN ── -->
+<section class="bild">
+  <div class="ogonbryn">Det jag höll på att missa</div>
+  <h2>Ett p-värde på 0,003 — som var en bugg</h2>
+  <p class="ingress">
+    Insynsköp var den sista kandidaten med publicerat forskningsstöd. Första
+    körningen gav <span class="mono" style="color:var(--measured)">+5,8 procentenheter</span>
+    med <span class="mono" style="color:var(--measured)">p = 0,003</span>. Ett tydligt,
+    statistiskt säkerställt "insynsköp fungerar".
+  </p>
+  <div class="citat">
+    Det var fel. När ett anrop till Finansinspektionen misslyckades cachades det
+    tomma svaret — i fem år.
+  </div>
+  <p class="ingress">
+    102 av 125 tidsfönster låg kvar som permanent tomma. <strong>Fyra hela år
+    saknades.</strong> På det trasiga underlaget såg signalen ut att fungera. Med
+    komplett register — 106 403 transaktioner — blev svaret
+    <span class="mono" style="color:var(--stamp)">−0,4 procentenheter, p = 0,75</span>.
+  </p>
+  <p class="ingress" style="margin-top:22px">
+    <strong>Ett signifikant p-värde är inte bevis på att signalen finns. Lika ofta
+    är det bevis på att datan är trasig.</strong>
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════ 7. VAD DEN ÄR BRA PÅ ── -->
+<section class="bild">
+  <div class="ogonbryn">Vad som återstår</div>
+  <h2>Tre saker som inte kräver en prognos</h2>
+  <div class="kort-rad">
+    <div class="kort">
+      <span class="tal">10</span>
+      <h3>Undvik-listan</h3>
+      <p>Bolag med utspädning, konkursmått i nödzonen eller går-vidare-tvivel i
+         rapporten. Wolfspeed, C3.ai, CoreWeave. Att slippa ett sådant bolag är
+         värt mer än att hitta en vinnare.</p>
+    </div>
+    <div class="kort">
+      <span class="tal">±7,8 %</span>
+      <h3>Risk i kronor</h3>
+      <p>Så mycket rör sig Ericsson på rapportdagen, mätt på 39 rapporter.
+         AstraZeneca ±2,6 %. Det är en mätning, inte en gissning — och den avgör
+         hur stor position du tål.</p>
+    </div>
+    <div class="kort">
+      <span class="tal">0,69</span>
+      <h3>Vad som förändrats</h3>
+      <p>Intel skrev om sitt riskavsnitt och lade till åtta nya stycken om
+         transaktionerna med amerikanska staten. Verktyget hittar rätt sida i
+         boken. Det läser den inte åt dig.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════ 8. SLUTET ── -->
+<section class="bild">
+  <div class="ogonbryn">Börscase</div>
+  <h1 style="font-size:clamp(32px,4.6vw,62px);max-width:22ch">
+    Varenda betaltjänst som säljer aktietips har samma resultat under huven.
+    De visar det bara inte.
+  </h1>
+  <p class="ingress" style="margin-top:28px">
+    Appen är gratis och förblir det. Ingen inloggning, inga API-nycklar, ingen
+    funktion bakom betalvägg, och ingen data som skickas någonstans — varje
+    installation hämtar sin egen, direkt från SEC, Finansinspektionen och MFN.
+  </p>
+  <a class="kaffe" href="https://buymeacoffee.com/myriskdashk" target="_blank" rel="noopener">
+    ☕ Bjud på en kaffe
+  </a>
+  <p class="ingress" style="margin-top:26px;font-size:14px;color:var(--paper-faint);max-width:70ch">
+    Ett räkneverktyg, inte finansiell rådgivning och ingen rekommendation att köpa
+    eller sälja. Historisk avkastning är ingen garanti för framtiden. Enskilda
+    aktier kan förlora hela sitt värde. Alla beslut är dina egna.
+  </p>
+</section>
+
+<div class="hint">← → eller mellanslag</div>
+<div class="nav">
+  <span class="rakn"><span id="nu">1</span> / <span id="av">8</span></span>
+  <button id="bak" aria-label="Föregående bild">←</button>
+  <button id="fram" aria-label="Nästa bild">→</button>
+</div>
+
+<script>
+const bilder = [...document.querySelectorAll(".bild")];
+let i = 0, vandSteg = 0;
+
+const PROV = [
+  ["Bara rapporttexten (Lazy Prices)", "−5,0 pp", "0,757"],
+  ["Bara finansiell styrka",           "−8,0 pp", "0,343"],
+  ["Bara tillväxt",                    "−9,1 pp", "0,460"],
+  ["Bara värdering",                  "−11,1 pp", "0,710"],
+  ["Bara marknad (momentum)",         "−17,3 pp", "1,000"],
+  ["Alla pelare sammanvägda",         "−18,3 pp", "0,890"],
+  ["Alla pelare + rapporttext",       "−20,6 pp", "0,970"],
+  ["Bara kvalitet",                   "−25,5 pp", "0,997"],
+  ["Insynsköp (ledningens egna pengar)", "−0,4 pp", "0,747"],
+];
+
+function ritaProtokoll(){
+  const kropp = document.getElementById("protokoll-kropp");
+  if(kropp.dataset.klar) return;
+  kropp.dataset.klar = "1";
+  kropp.innerHTML = PROV.map(([namn, varde, p], n) => `
+    <tr style="animation-delay:${n * 0.075}s">
+      <td>${namn}</td>
+      <td class="h varde">${varde}</td>
+      <td class="h">${p}</td>
+      <td style="text-align:right"><span class="stampel">UNDERKÄND</span></td>
+    </tr>`).join("");
+}
+
+function visa(n){
+  bilder[i].classList.remove("pa");
+  i = Math.max(0, Math.min(bilder.length - 1, n));
+  bilder[i].classList.add("pa");
+  document.getElementById("nu").textContent = i + 1;
+  document.getElementById("spine-nr").textContent = String(i + 1).padStart(2, "0");
+  document.getElementById("matare-fyll").style.width =
+    ((i + 1) / bilder.length * 100) + "%";
+  if(bilder[i].dataset.anim === "protokoll") ritaProtokoll();
+  if(bilder[i].dataset.anim !== "vandning") vandSteg = 0;
+}
+
+// Vändningen avslöjas i ett andra klick — hela poängen är att tittaren hinner
+// tro på den gröna siffran innan den röda kommer.
+function framat(){
+  if(bilder[i].dataset.anim === "vandning" && vandSteg === 0){
+    vandSteg = 1;
+    document.getElementById("vand-pil").classList.add("syns");
+    setTimeout(() => document.getElementById("vand-ruta").classList.add("syns"), 260);
+    return;
+  }
+  visa(i + 1);
+}
+function bakat(){
+  if(bilder[i].dataset.anim === "vandning" && vandSteg === 1){
+    vandSteg = 0;
+    document.getElementById("vand-pil").classList.remove("syns");
+    document.getElementById("vand-ruta").classList.remove("syns");
+    return;
+  }
+  visa(i - 1);
+}
+
+document.getElementById("av").textContent = bilder.length;
+document.getElementById("fram").onclick = framat;
+document.getElementById("bak").onclick = bakat;
+addEventListener("keydown", e => {
+  if(["ArrowRight", " ", "PageDown", "Enter"].includes(e.key)){ e.preventDefault(); framat(); }
+  if(["ArrowLeft", "PageUp", "Backspace"].includes(e.key)){ e.preventDefault(); bakat(); }
+  if(e.key === "Home") visa(0);
+  if(e.key === "End") visa(bilder.length - 1);
+});
+addEventListener("click", e => { if(!e.target.closest(".nav,a")) framat(); });
+visa(0);
+</script>
