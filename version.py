@@ -9,10 +9,16 @@ Versionen visas i sidhuvudet tillsammans med när skanningen gjordes, så att
 båda frågorna besvaras på en gång: rätt PROGRAM och färsk DATA.
 """
 
-VERSION = "1.12"
-DATUM = "2026-08-24"
+VERSION = "2.2"
+DATUM = "2026-09-17"
 
 NYHETER = [
+    ("2.2", "2026-09-17",
+     "Novo Nordisk tillagd — 218 bolag. Rapporter som bara hänvisar vidare i "
+     "stället för att skriva ut riskavsnittet underkänns nu i stället för att "
+     "mätas på fel text; Novos 20-F lägger risktexten i årsredovisningen."),
+    ("2.1", "2026-09-14", "Nyckeltalsvy med kassaflöde, lönsamhet, skulder, värdering och utdelning. Förklaringar, källor, helår/TTM och historiska jämförelser."),
+    ("2.0", "2026-09-08", "Analysrum med källor, förändringar, ledningsmål, värderingsscenarier, bevakningar och beständig analysjournal. Rättad period- och publiceringshantering. Skuggmodell med tidsordnad utvärdering."),
     ("1.12", "2026-08-24",
      "Stödlänkar till Buy Me a Coffee och PayPal — appen är och förblir gratis. "
      "Presentation på /presentation, gjord för att spelas in."),

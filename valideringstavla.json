@@ -2,17 +2,17 @@
  "sammansatt_utan_rapport": {
   "profil": "sammansatt_utan_rapport",
   "antal_ar": 13,
-  "antal_observationer": 1468,
-  "topp": 0.25597100144688745,
-  "botten": 0.43938504464684475,
-  "universum": 0.29326514898126366,
-  "overavkastning": -0.03729414753437625,
-  "topp_minus_botten": -0.1834140431999573,
-  "spearman": -0.025656875094136507,
-  "p_varde": 0.89,
+  "antal_observationer": 1509,
+  "topp": 0.259176098860485,
+  "botten": 0.4145784110210406,
+  "universum": 0.287613524654452,
+  "overavkastning": -0.028437425793966995,
+  "topp_minus_botten": -0.1554023121605556,
+  "spearman": -0.04248694006185687,
+  "p_varde": 0.8566666666666667,
   "godkand": false,
   "med_rapportsignaler": false,
-  "tid": "2026-08-13T12:19:00+02:00"
+  "tid": "2026-09-08T09:23:22+02:00"
  },
  "bara_kvalitet": {
   "profil": "bara_kvalitet",

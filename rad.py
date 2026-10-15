@@ -184,10 +184,10 @@ def lagesbedomning(m: dict) -> dict | None:
     return {"niva": niva, "rader": rader,
             "percentil": (ev or {}).get("percentil"),
             "rsi": rsi_,
-            "bevis": "OTESTAT. Appen har testat att rangordna bolag mot varandra — "
-                     "det föll åtta gånger av åtta. Att jämföra ett bolag med sin egen "
-                     "historia är en annan och rimligare fråga, men den är inte prövad "
-                     "här. Läs den som en prisuppgift, inte som ett besked."}
+            "bevis": "Om jämförelsen: Historiska priser och nyckeltal ger perspektiv på "
+                     "dagens värdering. Den här historiska jämförelsens förmåga att "
+                     "förutsäga avkastning är inte validerad. Appens test av "
+                     "bolagsrangordningen har inte visat någon säker överavkastning."}
 
 
 # ---------------------------------------------------------------- domen ----
@@ -237,6 +237,11 @@ def rekommendation(c: dict, kapital: float = 100000.0) -> dict:
                     "meningslösa.")
         gor.append("Bedöm bolaget på egen hand. Appen tillför inget här.")
         return _bygg("for_lite_data", f"{namn} går inte att bedöma här", skal, gor, c, kapital)
+
+    if not r.get("tillganglig") or not (r.get("foregaende") or {}).get("datum") or kal.get("fel"):
+        skal.append("Rapportunderlag, jämförelserapport eller rapportkalender saknas. Frånvaro av data är inte frånvaro av risk.")
+        return _bygg("for_lite_data", f"Ofullständigt underlag: {namn}", skal,
+                     ["Kontrollera senaste rapport och rapportdatum i originalkällan."], c, kapital)
 
     # --- 3. Något har hänt som du ska läsa FÖRE beslut ---
     las = []
@@ -295,7 +300,7 @@ def rekommendation(c: dict, kapital: float = 100000.0) -> dict:
         gor.append("INSYN: " + insyn_dom["text"])
     gor.append("Om du vill äga bolaget: håll dig till beloppet nedan.")
     gor.append("Skriv av falsifieringslistan och gå igenom den vid varje kvartal.")
-    return _bygg("ok", f"Inget hindrar {namn}", skal, gor, c, kapital)
+    return _bygg("ok", f"Inga identifierade varningar: {namn}", skal, gor, c, kapital)
 
 
 def _bygg(niva, rubrik, skal, gor, c, kapital):

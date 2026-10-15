@@ -148,6 +148,9 @@ class Bokslut:
     valuta: str | None = None
     varden: dict = field(default_factory=dict)
 
+    observationer: dict = field(default_factory=dict)
+    datakonflikter: list = field(default_factory=list)
+
     def v(self, namn):
         x = self.varden.get(namn)
         return None if x is None else float(x)
@@ -256,16 +259,21 @@ def bokslut_edgar(symbol: str, form: str | None = None) -> list[Bokslut]:
     per_ar: dict[str, dict] = {}
     publicerad: dict[str, str] = {}
     enheter: dict[str, int] = {}
+    observationer = {}
 
     def stoppa_in(namn, obs, langd_krav=None):
         for o in obs:
             slut = o.get("slut")
             if not slut:
                 continue
+            if langd_krav == "ar" and not o.get("start"):
+                continue
             if langd_krav == "ar" and o.get("start"):
                 dagar = (_datum(slut) - _datum(o["start"])).days
                 if dagar < 300 or dagar > 400:      # bara helår
                     continue
+            o = {**o, "cik": cik}
+            observationer.setdefault(slut, {}).setdefault(namn, []).append(dict(o))
             per_ar.setdefault(slut, {})
             if per_ar[slut].get(namn) is None:
                 per_ar[slut][namn] = o.get("varde")
@@ -278,12 +286,12 @@ def bokslut_edgar(symbol: str, form: str | None = None) -> list[Bokslut]:
                 enheter[e] = enheter.get(e, 0) + 1
 
     for namn, kand in XBRL_FLODE.items():
-        stoppa_in(namn, dk.xbrl_serie(facts, kand, "USD", form), langd_krav="ar")
+        stoppa_in(namn, dk.xbrl_serie(facts, kand, "USD", form, alla_versioner=True), langd_krav="ar")
     for namn, kand in XBRL_LAGE.items():
         enhet = "shares" if namn == "aktier_ute" else "USD"
-        stoppa_in(namn, dk.xbrl_serie(facts, kand, enhet, form))
+        stoppa_in(namn, dk.xbrl_serie(facts, kand, enhet, form, alla_versioner=True))
     for namn in ("aktier_utspadda",):
-        stoppa_in(namn, dk.xbrl_serie(facts, XBRL_FLODE[namn], "shares", form),
+        stoppa_in(namn, dk.xbrl_serie(facts, XBRL_FLODE[namn], "shares", form, alla_versioner=True),
                   langd_krav="ar")
 
     valuta = max(enheter, key=enheter.get) if enheter else "USD"
@@ -292,7 +300,33 @@ def bokslut_edgar(symbol: str, form: str | None = None) -> list[Bokslut]:
         if v.get("intakter") is None and v.get("nettoresultat") is None:
             continue
         ut.append(Bokslut(slut=slut, publicerad=publicerad.get(slut), kalla="edgar",
-                          valuta=valuta, varden=_harleds(dict(v))))
+                          valuta=valuta, varden=_harleds(dict(v)),
+                          observationer=observationer.get(slut, {})))
+    return bokslut_vid(sorted(ut, key=lambda b: b.slut), "9999-12-31")
+
+
+def bokslut_vid(alla, datum):
+    """Build each field from its latest available filing; derive only afterwards."""
+    ut = []
+    for b in alla:
+        if not b.observationer:
+            if b.publicerad and b.publicerad <= datum:
+                ut.append(b)
+            continue
+        v, dates, units = {}, [], []
+        for namn, obs in b.observationer.items():
+            eligible = [o for o in obs if o.get("filed") and o["filed"] <= datum]
+            if not eligible:
+                continue
+            o = max(eligible, key=lambda o: (o["filed"], o.get("start") or ""))
+            v[namn] = o["varde"]
+            dates.append(o["filed"])
+            if o.get("enhet") != "shares":
+                units.append(o.get("enhet"))
+        if not v or len(set(units)) > 1:
+            continue
+        ut.append(Bokslut(b.slut, max(dates), b.kalla, units[0] if units else b.valuta,
+                         _harleds(v), b.observationer))
     return sorted(ut, key=lambda b: b.slut)
 
 
@@ -332,8 +366,11 @@ def bokslut(symbol: str, meta: dict) -> list[Bokslut]:
     sammanslaget = []
     for b in e:
         yb = y_per_ar.get(_ar_av(b.slut))
-        if yb:
+        if yb and yb.slut == b.slut:
             for f in FALT:
+                ev, yv = b.varden.get(f), yb.varden.get(f)
+                if ev is not None and yv is not None and abs(ev-yv) > max(abs(ev), abs(yv), 1) * 0.05:
+                    b.datakonflikter.append({"matt": f, "sec": ev, "yahoo": yv, "period": b.slut, "vald": "SEC"})
                 if b.varden.get(f) is None and yb.varden.get(f) is not None:
                     b.varden[f] = yb.varden[f]
             b.varden = _harleds(b.varden)
@@ -352,6 +389,10 @@ def ttm(symbol: str) -> dict | None:
     if len(kv) < 4:
         return None
     fyra = kv[-4:]
+    # Reject missing/duplicate quarters before summing annual cash flows.
+    gaps = [(_datum(b.slut)-_datum(a.slut)).days for a,b in zip(fyra, fyra[1:])]
+    if not all(70 <= gap <= 110 for gap in gaps):
+        return None
     flode = ["intakter", "ksv", "bruttovinst", "rorelseresultat", "ebitda", "nettoresultat",
              "resultat_fore_skatt", "fou", "sga", "avskrivningar", "rantekostnad", "skatt",
              "kfo", "capex", "fritt_kassaflode", "aterkop", "utdelning", "nyemission", "sbc"]
@@ -425,3 +466,22 @@ def marknadsdata(symbol: str, meta: dict) -> dict:
         "utdelning_procent": _andel(info.get("dividendYield")),
         "kurser": kurser,
     }
+
+
+def kallor_for(b, symbol=None):
+    """Source metadata for raw fields, including units and exact SEC accession."""
+    result = {}
+    for name in b.varden:
+        observations = b.observationer.get(name) or []
+        if observations:
+            o = max(observations, key=lambda x: x.get("filed") or "")
+            result[name] = {"kalla": "SEC EDGAR", "tagg": o.get("tagg"),
+                            "publicerad": o.get("filed"), "start": o.get("start"),
+                            "slut": o.get("slut"), "enhet": o.get("enhet"),
+                            "accession": o.get("accession"),
+                            "url": ("https://www.sec.gov/Archives/edgar/data/" + str(int(o["cik"])) + "/" + o["accession"].replace("-", "") + "/" + o["accession"] + "-index.html") if o.get("cik") and o.get("accession") else None}
+        else:
+            result[name] = {"kalla": "Härlett eller kompletterat från Yahoo", "slut": b.slut,
+                            "enhet": b.valuta, "publicerad": None,
+                            "url": "https://finance.yahoo.com/quote/" + symbol + "/financials/" if symbol else None}
+    return result

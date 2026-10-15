@@ -1,0 +1,66 @@
+'use strict';
+const $=s=>document.querySelector(s);
+let company=null, overview=null;
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=x=>typeof x==='number'&&Number.isFinite(x)?x.toLocaleString('sv-SE',{maximumFractionDigits:3}):'Saknas';
+const dt=x=>x&&!Number.isNaN(Date.parse(x))?new Date(x).toLocaleString('sv-SE',{timeZone:'Europe/Stockholm',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'saknas';
+const pct=x=>typeof x==='number'?num(x*100)+' %':'Saknas';
+function link(source,label='Öppna källa'){const u=typeof source==='string'?source:source?.url;try{const url=new URL(u);if(!['https:','http:'].includes(url.protocol))return '';}catch{return '';}return `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;}
+function table(headers,rows){return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
+async function api(url,body){const r=await fetch(url,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok||d.fel)throw Error(d.fel||'Kunde inte läsa data');return d;}
+function status(message){$('#status').textContent=message;}
+async function loadOverview(){overview=await api('/api/intel');if(!overview.bolag.length)status('Ingen skanning finns ännu. Gå till översikten och kör en skanning.');const old=$('#company').value;$('#company').innerHTML=overview.bolag.map(s=>`<option>${esc(s)}</option>`).join('');if(overview.bolag.includes(old))$('#company').value=old;$('#journal-info').textContent=`${overview.antal_analyser} arkiverade analyser. ${overview.metod}`;const m=overview.modell;$('#model').innerHTML=`<p class="stat">${esc(m.status)}</p>${m.observationer?`<p>${m.observationer} observationer / ${m.manader} månader</p>`:''}${m.mse!=null?`<p>Medelkvadratfel ${num(m.mse)} mot baslinjens ${num(m.baslinje_mse)}. ${m.battre_an_baslinje?'Lägre fel i dessa tester.':'Ingen förbättring i dessa tester.'}</p>`:''}${m.tester?`<details><summary>Visa testperioder</summary>${table(['Månad','Observationer','Modellfel','Baslinjefel'],m.tester.map(t=>[esc(t.manad),num(t.n),num(t.mse),num(t.baslinje_mse)]))}</details>`:''}`;$('#outcomes').innerHTML=overview.utfall.length?table(['Bolag','Horisont','Aktie','Index','Netto över index'],overview.utfall.map(o=>[esc(o.symbol),num(o.horisont)+' d',pct(o.avkastning),pct(o.benchmark_avkastning),pct(o.overavkastning_netto)])):'Inga färdiga utfall ännu. Journalen väntar på faktisk framtida utveckling.';}
+function showAlerts(){ $('#all-alerts').innerHTML=overview.bevakningar.length?table(['Bolag','Villkor','Status'],overview.bevakningar.map(n=>[esc(n.symbol),esc(n.text),esc(n.status)])):'Inga sparade bevakningar.';}
+async function loadCompany(){const sym=$('#company').value;if(!sym)return;company=await api('/api/intel/'+encodeURIComponent(sym));showAlerts();const c=company,q=c.datakvalitet,r=c.rapport||{};$('#asof').textContent=`${c.namn||sym} · skanning ${dt(q.skanning)}`;$('#quality').innerHTML=`<div class="${q.problem.length?'warning':'card'}"><b>${esc(q.status)}</b><p>${q.problem.map(esc).join(' · ')}</p><small>Rapport: ${esc(q.rapportdatum||'saknas')} · Kursdatum: ${esc(q.kursdatum||'okänt')} · Täckning: ${pct(q.tackning)}</small><details><summary>Källor och saknade uppgifter</summary><p>${q.saknade_matt.map(esc).join(', ')||'Inga saknade mått bland modellens sex variabler'}</p><pre>${esc(JSON.stringify(q.kallor,null,2))}</pre>${link(q.rapport)}</details></div>`;
+$('#numbers').innerHTML=c.forandringar.length?table(['Mått','Föregående','Senaste','Förändring','Period / källa'],c.forandringar.map(n=>[esc(n.namn),num(n.fore),num(n.nu),num(n.skillnad)+(n.procent!=null?' ('+pct(n.procent)+')':''),`${esc(n.period_fore)} → ${esc(n.period_nu)}<br>${link(n.kalla_nu)}<details><summary>Underlag</summary><pre>${esc(JSON.stringify({fore:n.kalla_fore,nu:n.kalla_nu,typ:n.typ},null,2))}</pre></details>`])):'Bokslut saknas i arkivet. Hämta en ny analys ovan.';
+$('#scan-diff').innerHTML=(c.sedan_sist||[]).length?table(['Mått','Föregående','Nu','Skillnad'],c.sedan_sist.map(n=>[esc(n.matt),num(n.fore),num(n.nu),num(n.skillnad)])):'Inga jämförbara förändringar sedan föregående sparade analys.';
+$('#report').innerHTML=`<p>${link(r.senaste,'Senaste rapport')} ${link(r.foregaende,'Jämförelserapport')}</p>${(r.roda_flaggor||[]).map(f=>`<h3>${esc(f.flagga)}</h3><blockquote>${esc(f.citat)}</blockquote><small>Regelbaserad varning – kontrollera sammanhanget i originalrapporten.</small>`).join('')||'<p>Inga textflaggor i tillgängligt underlag.</p>'}`;
+$('#risks').innerHTML=(r.nya_risker||[]).map(n=>`<blockquote>${esc(n.text||n)}</blockquote>${link(r.senaste,'Läs i rapporten')}`).join('')||'<p>Ingen jämförbar textförändring tillgänglig.</p>';
+$('#quotes').innerHTML=(r.ledningsuttalanden||[]).map((p,i)=>`<blockquote>${esc(p.text)}</blockquote><small>${esc(p.kalla?.datum)} · ${link(p.kalla)}</small><p><button class="secondary quote" data-index="${i}">Använd som mål</button></p>`).join('')||'<p>Inga uttalanden arkiverade. Hämta en ny analys för att söka i rapporttexten.</p>';
+document.querySelectorAll('.quote').forEach(b=>b.onclick=()=>{const p=r.ledningsuttalanden[+b.dataset.index],f=$('#note-form');f.elements.kind.value='promise';f.elements.text.value=p.text;f.elements.source.value=p.kalla?.url||'';f.elements.threshold.focus();});
+$('#notes').innerHTML=c.bevakningar.length?table(['Tes / mål','Villkor','Aktuellt','Bedömning',''],c.bevakningar.map(n=>[esc(n.text),`${esc(n.metric)} ${esc(n.operator)} ${num(n.threshold)}<br>${esc(n.due||'Löpande')}`,num(n.aktuellt_varde),esc(n.status),`<button class="secondary archive" data-id="${n.id}">Arkivera</button>`])):'Inga sparade villkor för bolaget.';document.querySelectorAll('.archive').forEach(b=>b.onclick=async()=>{try{await api(`/api/intel/note/${b.dataset.id}/archive`,{});await loadOverview();await loadCompany();}catch(e){status(e.message);}});
+$('#history').innerHTML=table(['Observerad','Datatid','Version',''],c.journal.map(j=>[esc(dt(j.tid)),esc(dt(j.skanning)),esc(j.version),`<button class="secondary history-open" data-id="${j.id}">Visa</button>`]));
+$('#historical').innerHTML='';document.querySelectorAll('.history-open').forEach(b=>b.onclick=async()=>{try{const h=await api('/api/intel/snapshot/'+b.dataset.id);$('#historical').innerHTML=`<h3>Arkiverad analys ${esc(h.scan_time)}</h3><p>Version ${esc(h.version)} · ${esc(h.data.namn)}</p><p>${esc(h.data.tes||'')}</p>${table(['Mått','Då känt värde'],Object.entries(h.data.matt||{}).filter(([k,v])=>typeof v==='number').map(([k,v])=>[esc(k),num(v)]))}<details><summary>Rapport och källor vid tillfället</summary><pre>${esc(JSON.stringify(h.data.rapport,null,2))}</pre></details>`;}catch(e){status(e.message);}});
+const f=$('#scenario-form'),h=c.historik?.at(-1)||{},market=c.marknadsdata||{},m=c.matt||{};
+for(const [k,v]of Object.entries({revenue:h.intakter,margin:typeof m.rorelsemarginal==='number'?Math.round(m.rorelsemarginal*1000)/10:15,net_debt:typeof h.total_skuld==='number'&&typeof h.kassa==='number'?h.total_skuld-h.kassa:null,shares:market.aktier,market_cap:market.borsvarde||c.borsvarde})){f.elements[k].value=typeof v==='number'?v:'';}
+$('#currency').textContent=`Rapportvaluta: ${c.rapportvaluta||market.rapportvaluta||'okänd – kontrollera innan beräkning'}. Förifyllda siffror kommer från senaste analysen; övriga värden är redigerbara antaganden.`;$('#scenarios').innerHTML='';await loadKeyFigures();}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===b.dataset.tab));});
+const metrics={intakter:'Intäkter (belopp)',rorelseresultat:'Rörelseresultat (belopp)',fritt_kassaflode:'Fritt kassaflöde (belopp)',total_skuld:'Total skuld (belopp)',kassa:'Kassa (belopp)',roic:'ROIC (andel)',rorelsemarginal:'Rörelsemarginal (andel)',fcf_yield:'FCF / EV (andel)',nettoskuld_ebitda:'Nettoskuld / EBITDA',soliditet:'Soliditet (andel)',momentum_12_1:'Momentum (andel)'};$('#metric').innerHTML=Object.entries(metrics).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+$('#company').onchange=()=>loadCompany().catch(e=>status(e.message));
+$('#note-form').onsubmit=async e=>{e.preventDefault();try{const d=Object.fromEntries(new FormData(e.target));d.symbol=$('#company').value;await api('/api/intel/note',d);status('Villkoret sparades. Det följs upp mot nya analyser.');await loadOverview();await loadCompany();}catch(err){status(err.message);}};
+$('#scenario-form').onsubmit=async e=>{e.preventDefault();try{const d=Object.fromEntries(new FormData(e.target));for(const k of ['margin','growth','conversion','discount','terminal'])d[k]=+d[k]/100;const r=await api('/api/intel/scenario',d);$('#scenarios').innerHTML=`<div class="scenario-grid">${r.scenarier.map(s=>`<div class="card"><span class="pill">${esc(s.namn)}</span><h2 class="stat">${num(s.per_aktie)} / aktie</h2><p>${pct(s.skillnad_mot_borsvarde)} mot börsvärdet</p><small>Tillväxt ${pct(s.tillvaxt)} · Marginal ${pct(s.marginal)}<br>Terminalvärdets andel ${pct(s.terminalandel)}</small></div>`).join('')}</div><div class="card"><h2>Vad dagens pris kräver</h2><p>${r.implicit_tillvaxt==null?'Ingen lösning inom intervallet −50 till +100 % årlig tillväxt.':`Med övriga antaganden oförändrade krävs ${pct(r.implicit_tillvaxt)} årlig tillväxt.`}</p><h3>Känslighet för marginal och kapitalkostnad</h3>${table(['Kapitalkostnad','Marginal','Värde / aktie'],r.kanslighet.map(s=>[pct(s.kapitalkostnad),pct(s.marginal),num(s.per_aktie)]))}<p class="muted">${esc(r.metod)}</p></div>`;status('Scenarier beräknade.');}catch(err){status(err.message);}};
+async function run(action){try{await api('/api/intel/refresh',{action,symbol:$('#company').value});$('#refresh').disabled=$('#evaluate').disabled=true;status(action==='refresh'?'Hämtar rapporter och siffror. Det kan ta några minuter…':'Följer upp mogna utfall…');poll();}catch(e){status(e.message);}}
+async function poll(){try{const j=await api('/api/intel/job');if(j.running){setTimeout(poll,2000);return;}$('#refresh').disabled=$('#evaluate').disabled=false;status(j.error||'Klart.');await loadOverview();await loadCompany();}catch(e){$('#refresh').disabled=$('#evaluate').disabled=false;status(e.message);}}
+$('#refresh').onclick=()=>run('refresh');$('#evaluate').onclick=()=>run('evaluate');
+(async()=>{try{await loadOverview();await loadCompany();const j=await api('/api/intel/job');if(j.running){$('#refresh').disabled=$('#evaluate').disabled=true;poll();}}catch(e){status(e.message);}})();
+
+
+let keyRequest=0;
+function keyFormat(v, unit, currency){
+  if(typeof v!=='number'||!Number.isFinite(v))return 'Saknas';
+  if(unit==='percent')return pct(v);
+  if(unit==='times')return num(v)+' ×';
+  if(unit==='per_share')return num(v)+' '+(currency||'?')+'/aktie';
+  const a=Math.abs(v),scale=a>=1e9?1e9:a>=1e6?1e6:1;
+  return num(v/scale)+(scale===1e9?' md':scale===1e6?' mn':'')+' '+(currency||'?');
+}
+async function loadKeyFigures(){
+  const token=++keyRequest,symbol=$('#company').value;
+  if(!symbol)return;
+  $('#key-content').textContent='Läser nyckeltal…';
+  try{
+    const d=await api('/api/intel/'+encodeURIComponent(symbol)+'/nyckeltal?period='+$('#key-period').value);
+    if(token!==keyRequest)return;
+    $('#key-period-info').textContent=(d.period==='ttm'?'TTM till ':'Helår till ')+(d.slut||'period saknas')+' · Rapportvaluta: '+(d.valuta||'saknas')+(d.fore_slut?' · Jämförelse: '+d.fore_slut:'');
+    $('#key-warnings').innerHTML=d.varningar.map(w=>`<div class="warning">${esc(w)}</div>`).join('');
+    $('#key-content').innerHTML=d.grupper.map(g=>`<section class="key-section"><h2>${esc(g.namn)}</h2><div class="key-grid">${g.rader.map(r=>{
+      let comparison='';
+      if(r.fore!=null){comparison=`Föregående: ${esc(keyFormat(r.fore,r.enhet,d.valuta))}`;
+        if(r.skillnad!=null)comparison+=r.enhet==='percent'?` · ${num(r.skillnad*100)} procentenheter`:r.tillvaxt!=null?` · ${pct(r.tillvaxt)}`:` · skillnad ${esc(keyFormat(r.skillnad,r.enhet,d.valuta))}`;
+      }
+      return `<article class="card key-card"><h3>${esc(r.namn)}</h3><div class="key-value">${esc(keyFormat(r.varde,r.enhet,d.valuta))}</div><p class="muted">${comparison}</p><p>${esc(r.forklaring)}</p>${r.saknas?`<p class="muted">${esc(r.saknas)}</p>`:''}<details><summary>Beräkning och källa</summary><p>${esc(r.formel)}</p><p>Bokslut: ${esc(r.period||'saknas')}${r.kursdatum?' · Kursdatum: '+esc(r.kursdatum):''}</p>${r.kallor.map(k=>`<p class="key-source">${esc(k.falt)} · ${esc(k.kalla||'SEC')} · ${esc(k.publicerad||k.slut||'datum saknas')} ${link(k)}</p>`).join('')}</details></article>`;
+    }).join('')}</div></section>`).join('');
+    $('#key-unavailable').textContent=d.ej_tillgangligt.join(' · ')+'. '+d.notering;
+  }catch(e){if(token===keyRequest)$('#key-content').textContent=e.message;}
+}
+$('#key-period').onchange=loadKeyFigures;

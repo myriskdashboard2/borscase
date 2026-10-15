@@ -1,6 +1,9 @@
 # Börscase
 
-Ett räkneverktyg som letar case bland 217 börsbolag — på siffrorna **och** på vad
+**Version 2.0 (2026-09-08):** nytt Analysrum på `/analys` med källor, bokslutsförändringar, ledningsmål, bevakning, värderingsscenarier och lokal analysjournal med skuggmodell. Se [ANALYSRUM.md](ANALYSRUM.md). Resultattabellen nedan beskriver version 1; den verifierar inte version 2. Huvudmodellen har körts om med rättad datahantering och ligger fortsatt efter jämförelseurvalet.
+
+
+Ett räkneverktyg som letar case bland 218 börsbolag — på siffrorna **och** på vad
 rapporterna faktiskt säger. Allt körs lokalt på din egen dator. Inga API-nycklar,
 ingen inloggning, ingenting skickas någonstans.
 

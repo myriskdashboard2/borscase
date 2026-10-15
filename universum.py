@@ -130,6 +130,10 @@ USA = {
     "DIS": ("Disney", "Media"),
     # Hälsovård
     "LLY": ("Eli Lilly", "Hälsovård"),
+    # ADR som lämnar 20-F och rapporterar i DKK. Börsvärdet noteras i USD,
+    # men marknadsdata() räknar om det till rapportvalutan innan nyckeltalen
+    # beräknas — annars såg bolaget sju gånger billigare ut än det är.
+    "NVO": ("Novo Nordisk", "Hälsovård"),
     "JNJ": ("Johnson & Johnson", "Hälsovård"),
     "UNH": ("UnitedHealth", "Hälsovård"),
     "MRK": ("Merck", "Hälsovård"),

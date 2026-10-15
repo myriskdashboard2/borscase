@@ -98,6 +98,7 @@ code{background:#0b1017;padding:1px 5px;border-radius:4px;font-size:12px}
 </style>
 </head>
 <body>
+<div style="padding:12px 24px;background:#17383b;color:#fff"><a href="/analys" style="color:#94f4d3;font-weight:bold">Öppna Analysrummet → förändringar, ledningsmål, scenarier och journal</a><br><small>Historiska valideringar från version 1 är arkiverade resultat. De verifierar inte den rättade modellen i version 2.</small></div>
 
 <header>
   <div class="logo">Börscase<span id="versionslapp">läser in…</span></div>
@@ -223,7 +224,7 @@ code{background:#0b1017;padding:1px 5px;border-radius:4px;font-size:12px}
 
   <div class="kort">
     <h2>Läs en egen rapport</h2>
-    <p class="liten svag">De 217 bolagen i universumet läses automatiskt ovan. Det här är för
+    <p class="liten svag">De 218 bolagen i universumet läses automatiskt ovan. Det här är för
       bolag som INTE finns med: klistra in länken till rapporten eller texten direkt. Ange gärna
       förra årets rapport också, så mäts språkförändringen på samma sätt. Tänk på att jämföra
       samma period och samma språk — annars mäter du säsong eller ordbok i stället för
@@ -290,7 +291,7 @@ code{background:#0b1017;padding:1px 5px;border-radius:4px;font-size:12px}
     <h1>Vilka har skrivit om sin rapport?</h1>
     <p style="max-width:86ch">Bolag skriver rapporter genom att kopiera fjolårets text och ändra
       det som måste ändras. Talet nedan är cosinuslikheten mot förra jämförbara rapporten:
-      <b>1,000 = ordagrant samma text</b>. Ju lägre, desto mer har bolaget aktivt skrivit om.
+      <b>1,000 = samma relativa ordfrekvenser</b>. Ju lägre, desto mer har bolaget aktivt skrivit om.
       Enligt <b>Lazy Prices</b> (Cohen, Malloy &amp; Nguyen, Journal of Finance 2020) är stora
       omskrivningar — särskilt i riskavsnittet — en signal om att något faktiskt hänt.</p>
     <div class="rad" style="margin-top:12px">
@@ -686,7 +687,10 @@ function ritaCase(c){
   ] : [
     ["Kurs", c.kurs!=null? c.kurs.toFixed(2)+" "+(c.rapportvaluta||"") : "–"],
     ["Börsvärde", stort(m.borsvarde)+" "+(m.rapportvaluta||"")],
-    ["P/E", ggr(m.pe)], ["EV/EBITDA", ggr(m.ev_ebitda)],
+    ["P/E", (m.avstangda||[]).includes("pe") ? "Ej i branschmodellen" : ggr(m.pe)],
+    ["P/B", ggr(m.pb)], ["P/S", ggr(m.ps)],
+    ["EV/EBIT", ggr(m.ebit_ev>0 ? 1/m.ebit_ev : null)],
+    ["EV/EBITDA", ggr(m.ev_ebitda)],
     ["EBIT/EV", pct(m.ebit_ev)], ["Fritt kassaflöde / EV", pct(m.fcf_yield)],
     ["ROIC", pct(m.roic)], ["ROIC 5 år", pct(m.roic_5ar)],
     ["Bruttolönsamhet", m.bruttolonsamhet!=null? m.bruttolonsamhet.toFixed(2):"–"],
@@ -728,7 +732,10 @@ function ritaCase(c){
       <div class="minsta svagare" style="margin-top:8px">Percentil mot övriga bolag i skanningen.
         50 = mitten. Pelare utan tillräcklig data räknas inte in i poängen.</div></div>
     <div class="kort"><h3>Nyckeltal</h3><div class="nyckel">
-      ${nyckeltal.map(([k,v])=>`<div>${k}</div><div>${v}</div>`).join("")}</div></div>
+      ${nyckeltal.map(([k,v])=>`<div>${k}</div><div>${v}</div>`).join("")}</div>
+      <p class="minsta svagare">P/E avser historisk vinst. Ett streck betyder att underlag saknas eller att måttet inte kan beräknas meningsfullt, exempelvis vid förlust.
+      ${esc(m.avstangt_varfor||"")}</p>
+      <a href="/analys">Öppna Analysrummet för multiplar, perioder och källor</a></div>
     <div class="kort"><h3>Det som talar för</h3>
       ${c.for?.length? c.for.map(b=>`<div class="bevis">${esc(b.text)}
         <div class="minsta svagare">${esc(b.pelare)} · percentil ${p0(b.percentil)}</div></div>`).join("")
@@ -922,6 +929,12 @@ function rapportKort(r, rubrik, visaTolkning=true){
       ${esc(t.text)}</div>`;
   }).join("");
 
+  // Novo Nordisk m.fl. lämnar 20-F utan riskavsnitt och hänvisar till
+  // årsredovisningen. Då ska rutan säga det, inte bara visa färre rader.
+  const saknade = [];
+  if(r.avsnitt_hittade?.riskfaktorer === false) saknade.push("riskavsnittet");
+  if(r.avsnitt_hittade?.vd_analys === false) saknade.push("vd:ns analys");
+
   let html = `<div class="kort"><h2>${rubrik}${r.namn? " — "+esc(r.namn):""}</h2>
     ${tolk? `<div style="margin:10px 0 16px;max-width:88ch">
       <div class="minsta svag" style="margin-bottom:6px">VAD SIFFRORNA SÄGER</div>${tolk}</div>`:""}
@@ -933,14 +946,20 @@ function rapportKort(r, rubrik, visaTolkning=true){
       ${r.senaste?.pdf? `· <a href="${esc(r.senaste.pdf)}" target="_blank">PDF</a>`:""}
       ${r.foregaende? `· jämförd med ${esc(r.foregaende.datum)}`:""}</div>
 
+    ${saknade.length? `<div class="liten" style="margin-top:10px;border-left:3px solid var(--gul);
+      padding-left:11px;max-width:88ch">Rapporten innehåller inte ${saknade.join(" eller ")}
+      som löptext — bolaget hänvisar i stället vidare till sin årsredovisning. Omskrivning och
+      tonläge räknas därför bara på hela rapporten, och går inte att jämföra med bolag där
+      avsnittet finns utskrivet.</div>`:""}
+
     <div class="tva" style="margin-top:14px">
       <div>
         <h3>Hur mycket har bolaget skrivit om?</h3>
         ${likhetsrad(f,"Riskavsnittet")}${likhetsrad(fv,"Vd:ns analys")}${likhetsrad(fh,"Hela rapporten")}
         ${!f&&!fv&&!fh? '<div class="svagare liten">Bara en rapport hämtad — inget att jämföra med.</div>':""}
-        <div class="minsta svagare" style="margin-top:6px">1,000 = ordagrant samma text som i fjol.
-          Under 0,90 betyder att bolaget aktivt skrivit om sin riskbild. Cohen, Malloy &amp; Nguyen
-          (2020) fann att stora omskrivningar följdes av sämre avkastning.</div>
+        <div class="minsta svagare" style="margin-top:6px">1,000 = samma relativa ordfrekvenser som i fjol, inte nödvändigtvis samma meningar.
+          Lägre likhet markerar förändrad ordanvändning. Läs styckena för att avgöra vad som ändrats;
+          måttet är ingen prognos om aktiens avkastning.</div>
       </div>
       <div>
         <h3>Tonläge — andel negativa ord</h3>

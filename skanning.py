@@ -31,6 +31,7 @@ import rapportkalender as rk
 import rapportlasning as rl
 import svenska_rapporter as sv
 import universum as un
+import intel
 
 HAR = os.path.dirname(os.path.abspath(__file__))
 RESULTATFIL = os.path.join(HAR, "skanning_resultat.json")
@@ -120,15 +121,15 @@ def samla_bolag(sym: str, meta: dict, las_rapport: bool, rapportdjup: int) -> di
                 insyn = {"fel": str(e)}
 
         ut.update({
+            "datakonflikter": [f"{b.slut}: {x['matt']} skiljer mer än 5 % mellan SEC och Yahoo (SEC används)" for b in historik[-2:] for x in b.datakonflikter],
             "matt": matt_,
             "rapport": rapport,
             "kalender": kalender,
             "insyn": insyn,
             "historik": [{"slut": b.slut, "publicerad": b.publicerad, "kalla": b.kalla,
+                          "valuta": b.valuta, "kallor": fu.kallor_for(b, sym),
                           **{k: b.v(k) for k in
-                             ("intakter", "bruttovinst", "rorelseresultat", "nettoresultat",
-                              "kfo", "capex", "fritt_kassaflode", "tillgangar",
-                              "eget_kapital", "total_skuld", "kassa", "aktier_utspadda")}}
+                             fu.FALT}}
                          for b in historik],
             "marknad": {k: v for k, v in marknad.items() if k != "kurser"},
             "kurshistorik": {str(i): float(v) for i, v in
@@ -161,6 +162,7 @@ def kompakt_rapport(r: dict | None) -> dict | None:
         "tonlage_risk": r.get("tonlage_risk"),
         "tonlage_vd": r.get("tonlage_vd"),
         "tonlagestrend": r.get("tonlagestrend"),
+        "ledningsuttalanden": r.get("ledningsuttalanden", []),
         "forandring_hela": r.get("forandring_hela"),
         "forandring_risk": r.get("forandring_risk"),
         "forandring_vd": r.get("forandring_vd"),
@@ -234,6 +236,12 @@ def skanna(profil: str = "sammansatt", symboler=None, las_rapporter: bool = True
         c = C.bygg_case(s, {**r["meta"], "namn": r["meta"]["namn"]},
                         r["matt"], r.get("rapport"), percentiler[s], profil)
         c["rapport"] = kompakt_rapport(r.get("rapport"))
+        c["datakonflikter"] = r.get("datakonflikter", [])
+        c["historik"] = r["historik"]
+        c["kursdatum"] = max(r.get("kurshistorik") or {}, default=None)
+        c["marknadsdata"] = r["marknad"]
+        c["datakallor"] = [{"namn": "Yahoo Finance", "hamtad": dk.cache_tid("yf_info_" + s), "typ": "Marknadsdata"},
+                              {"namn": "SEC EDGAR / Yahoo", "typ": "Bokslut; se källa per fält"}]
         c["insyn"] = r.get("insyn")
         kal = r.get("kalender") or {}
         # De åtta senaste reaktionerna följer med i den sparade skanningen. De
@@ -263,6 +271,7 @@ def skanna(profil: str = "sammansatt", symboler=None, las_rapporter: bool = True
     fel = {s: r["fel"] for s, r in ravaror.items() if r.get("fel")}
     modelldom = rk.las_dom()
     resultat = {
+        "analysversion": intel.VERSION,
         "tid": dk.nu_iso(),
         "sekunder": round(time.time() - t0, 1),
         "profil": profil,
@@ -282,8 +291,17 @@ def spara(resultat: dict) -> None:
     lattare = dict(resultat)
     lattare["case"] = [{k: v for k, v in c.items() if k != "percentiler"}
                        for c in resultat["case"]]
-    with open(RESULTATFIL, "w", encoding="utf-8") as f:
-        json.dump(lattare, f, ensure_ascii=False, default=str)
+    import tempfile
+    fd, temporary = tempfile.mkstemp(dir=HAR, suffix=".json.tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(lattare, f, ensure_ascii=False, default=str)
+        os.replace(temporary, RESULTATFIL)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+    intel.snapshot(lattare)
+    intel.evaluate()
 
 
 def las_sparat() -> dict | None:
@@ -314,31 +332,27 @@ def detaljer(sym: str, profil: str = "sammansatt", las_rapport: bool = True,
     platt = C.platta_matt(r["matt"], r.get("rapport"))
     sparat = las_sparat()
     if sparat:
-        # Jämför mot samma fält som i träfflistan — och mot samma GRUPP, annars
-        # stämmer inte percentilerna i djupdykningen med dem i listan.
-        bransch = U[sym]["bransch"]
-        grupp = "bank" if bransch in C.BANKBRANSCHER else U[sym].get("grupp", "karna")
-        jamforelse = [c for c in sparat["case"]
-                      if ("bank" if c.get("bransch") in C.BANKBRANSCHER
-                          else c.get("grupp")) == grupp]
-        if len(jamforelse) < C.MINSTA_GRUPP:
-            jamforelse = sparat["case"]
-        falt = []
-        for pelare in C.PELARE.values():
-            falt += [f for f, *_ in pelare]
-        fait = {f: [] for f in falt}
-        for c in jamforelse:
-            for f in falt:
-                fait[f].append((c.get("matt") or {}).get(f))
-        riktningar = {f: rr for pelare in C.PELARE.values() for f, rr, *_ in pelare}
-        perc = {f: C._percentil(fait[f], platt.get(f), riktningar[f]) for f in falt}
+        # Use exactly the same metric set and peer grouping as the full scan,
+        # including bank-specific metrics. Replace this company's old numbers.
+        comparison = {x["symbol"]: x.get("matt") or {} for x in sparat["case"]}
+        comparison[sym] = platt
+        groups = {x["symbol"]: "bank" if x.get("bransch") in C.BANKBRANSCHER
+                  else x.get("grupp", "karna") for x in sparat["case"]}
+        groups[sym] = "bank" if U[sym]["bransch"] in C.BANKBRANSCHER else U[sym].get("grupp", "karna")
+        perc = C.rangordna(comparison, groups)[sym]
     else:
         perc = C.rangordna({sym: platt})[sym]
 
     c = C.bygg_case(sym, U[sym], r["matt"], r.get("rapport"), perc, profil)
+    c["datakonflikter"] = r.get("datakonflikter", [])
     c["historik"] = r["historik"]
     c["kurshistorik"] = r["kurshistorik"]
     c["marknad"] = r["marknad"]
+    c["marknadsdata"] = r["marknad"]
+    c["kursdatum"] = max(r.get("kurshistorik") or {}, default=None)
+    c["kurs"] = r["marknad"].get("pris")
+    c["borsvarde"] = r["marknad"].get("borsvarde")
+    c["rapportvaluta"] = r["marknad"].get("rapportvaluta")
     c["rapport"] = r.get("rapport")
     c["percentiler"] = perc
     c["ttm"] = (r["matt"] or {}).get("ttm")

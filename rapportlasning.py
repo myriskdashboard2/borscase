@@ -492,8 +492,29 @@ KRAV = {
 }
 
 
+# Ett avsnitt som bara HÄNVISAR vidare är inte avsnittet. Novo Nordisks 20-F
+# skriver "D. RISK FACTORS — For information on risk factors, reference is made
+# to 'Risk management' on pages 41-42 of our Annual Report 2025" och lägger
+# själva texten i en PDF-bilaga som aldrig lämnas till SEC. Utan den här
+# kontrollen började urklippet vid hänvisningen och svalde nästa avsnitt i
+# stället: 17 500 ord ekonomisk översikt, mätt som om det vore risktext, med
+# 1,0 % negativa ord mot 3–5 % i ett riktigt riskavsnitt. Risk- och VD-
+# avsnittet blev dessutom samma text, likhet 0,98 mot sig självt.
+HANVISNING = re.compile(
+    r"reference\s+is\s+made\s+to"
+    r"|incorporat\w+\s+(?:herein\s+)?by\s+reference"
+    r"|refer\s+to\s+(?:the\s+)?(?:section|caption|pages?)", re.I)
+
+
+def ar_hanvisning(text: str) -> bool:
+    """Sant om urklippet inleds med en hänvisning i stället för med texten."""
+    return bool(HANVISNING.search(text[:400]))
+
+
 def ser_rimligt_ut(text: str, namn: str) -> bool:
     """Sant om urklippet faktiskt liknar det avsnitt vi bad om."""
+    if text and ar_hanvisning(text):
+        return False
     krav = KRAV.get(namn)
     if not krav or not text:
         return bool(text)
@@ -824,6 +845,7 @@ def analysera_bolag(symbol: str, form: str = "10-K", djup: int = 3) -> dict:
         return {"tillganglig": False,
                 "skal": "Inga rapporter hittades hos SEC för symbolen."}
 
+    import intel
     nu = rapporter[0]
     forra = rapporter[1] if len(rapporter) > 1 else None
 
@@ -834,6 +856,7 @@ def analysera_bolag(symbol: str, form: str = "10-K", djup: int = 3) -> dict:
 
     ut = {
         "tillganglig": True,
+        "ledningsuttalanden": intel.promises(nu["text"], {"url": nu["url"], "datum": nu["datum"]}),
         "form": form,
         "senaste": {"datum": nu["datum"], "period": nu.get("rapportdatum"), "url": nu["url"]},
         "foregaende": ({"datum": forra["datum"], "url": forra["url"]} if forra else None),

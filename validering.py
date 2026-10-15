@@ -62,7 +62,7 @@ RESULTAT = os.path.join(HAR, "validering_resultat.json")
 
 def bokslut_pit(alla, datum: str):
     """Bokslut som var publicerade senast `datum`. Utan detta filter är allt fusk."""
-    return [b for b in alla if b.publicerad and b.publicerad <= datum]
+    return fu.bokslut_vid(alla, datum)
 
 
 def kurs_vid(serie, datum: str):
@@ -78,7 +78,7 @@ def matt_pit(sym, meta, alla_bokslut, datum, just, ojust, rapportlikhet=None):
     if len(hist) < 2:
         return None
     b = hist[-1]
-    aktier = b.v("aktier_utspadda") or b.v("aktier_ute")
+    aktier = b.v("aktier_ute") or b.v("aktier_utspadda")
     pris_ojust = kurs_vid(ojust, datum)
     if not aktier or not pris_ojust:
         return None
@@ -195,10 +195,11 @@ def kor(ar_fran: int = 2013, ar_till: int | None = None, profil: str = "sammansa
         if len(platta) < 20:
             continue
 
-        perc = C.rangordna(platta)
+        grupper = {s: "bank" if U[s]["bransch"] in C.BANKBRANSCHER else U[s].get("grupp", "karna") for s in platta}
+        perc = C.rangordna(platta, grupper)
         poang = {}
         for sym, p in platta.items():
-            pel = C.pelarpoang(perc[sym])
+            pel = C.pelarpoang(perc[sym], U[sym]["bransch"])
             varn = C.varningar_for(p, None)
             t = C.total(pel, varn, profil, har_rapport=bool(p.get("rapport_tillganglig")))
             if t["poang"] is not None and t["tackning"] >= 0.6:
@@ -246,12 +247,15 @@ def kor(ar_fran: int = 2013, ar_till: int | None = None, profil: str = "sammansa
         "antal_ar": len(ar_rader),
         "antal_observationer": len(alla_par),
         "profil": profil,
+        "protokoll": "2.0-pit-observationer",
+        "begransningar": ["Dagens universum: överlevnadsbias kvarstår", "USA; inte validerat för svenska bolag", "Aktieantal mellan rapport och värderingsdag är en approximation; ADR och omräknade aktieantal kräver särskild kontroll"],
         "med_rapportsignaler": las_rapporter,
     }
 
     facit["nollkontroll"] = nollkontroll(alla_par, facit["snitt_overavkastning"],
                                          antal_slump, framsteg)
     facit["dom"] = fall_dom(facit)
+    facit["dom"]["text"] += " Explorativt test: dagens bolagsurval och upprepade modellförsök medför bias. Ingen oberoende bekräftelse av framtida avkastning."
     facit["tid"] = dk.nu_iso()
     return facit
 
@@ -259,8 +263,9 @@ def kor(ar_fran: int = 2013, ar_till: int | None = None, profil: str = "sammansa
 def _spearman(a, b):
     if len(a) < 5:
         return None
-    ra = np.argsort(np.argsort(a)).astype(float)
-    rb = np.argsort(np.argsort(b)).astype(float)
+    import pandas as pd
+    ra = pd.Series(a).rank(method="average").to_numpy()
+    rb = pd.Series(b).rank(method="average").to_numpy()
     if ra.std() == 0 or rb.std() == 0:
         return None
     return float(np.corrcoef(ra, rb)[0, 1])
@@ -338,7 +343,7 @@ def fall_dom(f: dict) -> dict:
                  "att modellen plockar ut bolag som RÖR SIG mycket än bolag som går bra.")
 
     if godkand:
-        text = ("Modellen klarade alla fyra kraven på ur-provs-data. Det betyder "
+        text = ("Modellen klarade alla fem kraven i detta historiska test. Det betyder "
                 "att rangordningen haft ETT SAMBAND med efterföljande avkastning i "
                 "det här universumet och den här perioden. Det är inte samma sak som "
                 "att den kommer fortsätta ha det, och överlevnadsbias gör siffran "

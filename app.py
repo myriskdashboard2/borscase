@@ -28,6 +28,29 @@ import validering as va
 
 HAR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=None)
+from intel_api import bp as intel_bp
+app.register_blueprint(intel_bp)
+
+@app.before_request
+def local_request_guard():
+    from urllib.parse import urlsplit
+    from flask import abort
+    if request.host.split(":")[0] not in ("127.0.0.1", "localhost", "[::1]"):
+        abort(403)
+    if request.method == "POST":
+        origin = request.headers.get("Origin")
+        if origin and urlsplit(origin).netloc != request.host:
+            abort(403)
+        if not request.is_json:
+            abort(415)
+
+@app.after_request
+def local_response_headers(response):
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    return response
+
 
 JOBB = {"kor": False, "vad": None, "meddelande": "", "klart": 0, "av": 0, "fel": None}
 _LAS = threading.Lock()
@@ -105,6 +128,8 @@ def skanning_las():
     if not res:
         return jsonify({"finns": False})
     res["finns"] = True
+    for c in res.get("case", []):
+        c["rad"] = rd.rekommendation(c, sk.las_installningar().get("kapital_kr", 100000))
     return jsonify(res)
 
 
@@ -187,6 +212,9 @@ def omrangordna():
 def validering_las():
     f = va.las_sparat() or {"finns": False}
     f["tavla"] = va.las_tavla()
+    f["arkiverad_modell"] = f.get("protokoll") != "2.0-pit-observationer"
+    if f["arkiverad_modell"] and f.get("dom"):
+        f["dom"]["text"] = "ARKIVERAT TEST AV VERSION 1 – verifierar inte version 2. " + f["dom"].get("text", "")
     return jsonify(f)
 
 
@@ -512,6 +540,6 @@ if __name__ == "__main__":
     print("   Det har fonstret maste vara oppet sa lange du anvander appen.")
     print(flush=True)
 
-    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
+    if os.environ.get("WERKZEUG_RUN_MAIN") != "true" and not os.environ.get("BORSCASE_NO_BROWSER"):
         threading.Timer(1.2, lambda: webbrowser.open(f"http://127.0.0.1:{port}")).start()
     app.run(host="127.0.0.1", port=port, debug=False, threaded=True)

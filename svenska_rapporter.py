@@ -272,9 +272,11 @@ def analysera_svenskt_bolag(symbol: str, namn: str, djup: int = 6) -> dict:
         except Exception:
             text_forra = ""
 
+    import intel
     sprak = nu["sprak"]
     ut = {
         "tillganglig": True,
+        "ledningsuttalanden": intel.promises(text_nu, {"url": nu["pdf"], "datum": nu["datum"]}),
         "form": nu["titel"],
         "kalla": "MFN",
         "sprak": sprak,

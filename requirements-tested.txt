@@ -1,0 +1,6 @@
+# Direktberoenden i miljön där version 2.0 verifierades.
+yfinance==0.2.62
+pandas==2.3.0
+numpy==2.3.0
+flask==3.1.3
+pypdf==6.15.0

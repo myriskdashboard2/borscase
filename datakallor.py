@@ -69,11 +69,15 @@ def cache_las(nyckel: str, max_alder_h: float):
 
 
 def cache_skriv(nyckel: str, varde) -> None:
+    import tempfile
+    fd, temporary = tempfile.mkstemp(dir=CACHE, suffix=".tmp")
     try:
-        with open(_cachefil(nyckel), "w", encoding="utf-8") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(varde, f, ensure_ascii=False)
-    except Exception:
-        pass
+        os.replace(temporary, _cachefil(nyckel))
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def cache_alder_h(nyckel: str):
@@ -295,7 +299,7 @@ INTRESSANTA_TAGGAR = {
 }
 
 
-def xbrl_serie(facts: dict, kandidater, enhet: str = "USD", form: str = "10-K"):
+def xbrl_serie(facts: dict, kandidater, enhet: str = "USD", form: str = "10-K", alla_versioner: bool = False):
     """
     Plockar ut en tidsserie ur companyfacts.
 
@@ -324,15 +328,18 @@ def xbrl_serie(facts: dict, kandidater, enhet: str = "USD", form: str = "10-K"):
                     "slut": obs.get("end"), "start": obs.get("start"),
                     "varde": obs.get("val"), "filed": obs.get("filed"),
                     "form": obs.get("form"), "fy": obs.get("fy"), "fp": obs.get("fp"),
-                    "tagg": tagg, "enhet": nyckel,
+                    "tagg": tagg, "enhet": nyckel, "accession": obs.get("accn"),
                 })
             if rader:
+                if alla_versioner:
+                    return sorted(rader, key=lambda x: (x["slut"] or "", x["filed"] or ""))
                 # Samma period kan rapporteras flera gånger (omräkningar). Behåll den
                 # FÖRSTA publicerade — det är den investeraren faktiskt såg då.
                 per_period = {}
                 for r in sorted(rader, key=lambda x: (x["slut"] or "", x["filed"] or "")):
-                    if r["slut"] not in per_period:
-                        per_period[r["slut"]] = r
+                    key = (r["start"], r["slut"], r["enhet"])
+                    if key not in per_period:
+                        per_period[key] = r
                 return sorted(per_period.values(), key=lambda x: x["slut"] or "")
     return []
 
@@ -358,7 +365,8 @@ def yahoo_info(symbol: str, max_alder_h: float = 12) -> dict:
         except Exception:
             info = {}
     behall = {k: v for k, v in info.items() if isinstance(v, (str, int, float, bool, type(None)))}
-    cache_skriv(nyckel, behall)
+    if behall:
+        cache_skriv(nyckel, behall)
     return behall
 
 
@@ -374,7 +382,7 @@ def yahoo_kurser(symbol: str, period: str = "10y", max_alder_h: float = 12,
     inte ett justerat. Blandar man ihop dem blir historiska P/E-tal fel med
     exakt splitfaktorn, och en validering byggd på dem är värdelös.
     """
-    nyckel = f"yf_kurs_{symbol}_{period}" + ("" if justerade else "_raa")
+    nyckel = f"yf_kurs_{symbol}_{period}" + ("" if justerade else "_noterad_v2")
     cachad = cache_las(nyckel, max_alder_h)
     if cachad is not None:
         return pd.Series(cachad, dtype=float) if cachad else pd.Series(dtype=float)
@@ -385,9 +393,10 @@ def yahoo_kurser(symbol: str, period: str = "10y", max_alder_h: float = 12,
         except Exception:
             h = None
     if h is None or h.empty:
-        cache_skriv(nyckel, {})
         return pd.Series(dtype=float)
     s = h["Close"].dropna()
+    if not justerade:
+        s = aterstall_splittar(h).dropna()
     d = {str(i.date()): float(v) for i, v in s.items()}
     cache_skriv(nyckel, d)
     return pd.Series(d, dtype=float)
@@ -432,10 +441,28 @@ def valutakurs(fran: str, till: str, max_alder_h: float = 12) -> float:
     if cachad:
         return float(cachad["kurs"])
     s = yahoo_kurser(f"{fran}{till}=X", period="1mo", max_alder_h=max_alder_h)
-    kurs = float(s.iloc[-1]) if len(s) else 1.0
+    if not len(s):
+        raise ValueError(f"Växelkurs saknas för {fran}/{till}; räknar inte med påhittad kurs 1,0")
+    kurs = float(s.iloc[-1])
     cache_skriv(nyckel, {"kurs": kurs})
     return kurs
 
 
 def nu_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+def cache_tid(nyckel):
+    path = _cachefil(nyckel)
+    return datetime.fromtimestamp(os.path.getmtime(path), timezone.utc).isoformat() if os.path.exists(path) else None
+
+
+def aterstall_splittar(history):
+    """Yahoo Close is split-adjusted even with auto_adjust=False.
+    Undo later split factors, excluding the split on the price date itself.
+    """
+    splits = history.get("Stock Splits")
+    if splits is None:
+        raise ValueError("Splitdata saknas; historiskt börsvärde kan inte beräknas")
+    factors = splits.replace(0, 1).iloc[::-1].cumprod().iloc[::-1] / splits.replace(0, 1)
+    return history["Close"] * factors

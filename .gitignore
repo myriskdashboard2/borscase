@@ -33,3 +33,18 @@ start_prov.txt
 #    rapportmodell.json    modellen inte fungerar, och de ar hela poangen -
 #    insynsmodell.json     utan dem ser appen ut att lova nagot den inte kan.
 # ============================================================================
+
+# Lokal analysjournal och säkerhetskopior
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+backups/
+
+# Byggda leveranser. Dokumenten, skärmbilderna och den utbrutna kopian av
+# dashboardens JavaScript genereras av skripten i samma mapp och är därför
+# härledda filer. Skripten följer med, resultatet byggs om vid behov.
+leverans/*.pdf
+leverans/*.docx
+leverans/dashboard-check.js
+leverans/qa/
+leverans/qa-metoder/
