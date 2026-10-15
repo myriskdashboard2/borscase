@@ -32,7 +32,7 @@ SVERIGE = {
     "BEIJ-B.ST": ("Beijer Ref B", "Industri"),
     "AQ.ST": ("AQ Group", "Industri"),
     "VOLCAR-B.ST": ("Volvo Car B", "Fordon"),
-    "AUTO.ST": ("Autoliv SDB", "Fordon"),
+    "ALIV-SDB.ST": ("Autoliv SDB", "Fordon"),   # inte AUTO.ST - den tickern finns inte
     "HUSQ-B.ST": ("Husqvarna B", "Industri"),
     "ELUX-B.ST": ("Electrolux B", "Sällanköp"),
     "GETI-B.ST": ("Getinge B", "Hälsovård"),
@@ -279,6 +279,160 @@ HALVLEDARE_AI = {
 USA.update(HALVLEDARE_AI)
 
 
+
+# ---------------------------------------------------- Simplicity Småbolag --
+#
+# Innehaven i fonden Simplicity Småbolag Global, enligt halvårsredogörelsen
+# per 2026-06-30. Varje symbol är uppslagen mot Yahoo och godkänd först när
+# bolagsnamnet stämde och ett börsvärde fanns — inget är intaget på gissning.
+#
+# Tre av 136 innehav saknas med avsikt: Boshiwa International står med
+# marknadsvärde noll i rapporten, Handcome hade ingen symbol som gick att
+# bekräfta, och Catalyst Pharmaceuticals svarar 404 hos Yahoo. Cirrus Logic
+# ligger redan i halvledargruppen och dubbleras inte.
+#
+# De här bolagen har varken SEC eller MFN som rapportkälla, så rapporttexten
+# går inte att läsa för de flesta av dem. Siffrorna kommer från Yahoo och är
+# därför kortare bakåt än för amerikanska bolag — och utan publiceringsdatum,
+# vilket gör dem olämpliga i valideringen. De ligger i en EGEN GRUPP, eftersom
+# ett småbolag jämfört med Microsoft alltid får fel värderingspercentil.
+#
+# (symbol): (namn, bransch, marknad, valuta, edgar)
+SMABOLAG_GLOBAL = {
+    "009970.KS": ("Youngone Holdings Co., Ltd.", "Sällanköp", "Sydkorea", "KRW", False),
+    "032640.KS": ("LG Uplus Corp.", "Telekom", "Sydkorea", "KRW", False),
+    "0546.HK": ("Fufeng Group Limited", "Kemi", "Hongkong", "HKD", False),
+    "103590.KS": ("Iljin Electric Co.,Ltd", "Industri", "Sydkorea", "KRW", False),
+    "1070.HK": ("TCL Electronics Holdings Limited", "Teknik", "Hongkong", "HKD", False),
+    "1579.HK": ("Yihai International Holding Ltd.", "Dagligvaror", "Hongkong", "HKD", False),
+    "175330.KS": ("JB Financial Group Co., Ltd.", "Bank", "Sydkorea", "KRW", False),
+    "214320.KS": ("Innocean Worldwide Inc.", "Media", "Sydkorea", "KRW", False),
+    "2685.T": ("and ST HD Co.,Ltd.", "Sällanköp", "Japan", "JPY", False),
+    "2782.T": ("Seria Co., Ltd.", "Dagligvaror", "Japan", "JPY", False),
+    "3306.HK": ("JNBY Design Limited", "Sällanköp", "Hongkong", "HKD", False),
+    "3339.HK": ("Lonking Holdings Limited", "Industri", "Hongkong", "HKD", False),
+    "3923.T": ("Rakus Co., Ltd.", "Teknik", "Japan", "JPY", False),
+    "4368.T": ("Fuso Chemical Co.,Ltd.", "Kemi", "Japan", "JPY", False),
+    "4732.T": ("USS Co., Ltd.", "Fordon", "Japan", "JPY", False),
+    "5105.T": ("Toyo Tire Corporation", "Fordon", "Japan", "JPY", False),
+    "6448.T": ("Brother Industries, Ltd.", "Industri", "Japan", "JPY", False),
+    "6845.T": ("Azbil Corporation", "Industri", "Japan", "JPY", False),
+    "7606.T": ("TABAYA HOLDINGS Co., Ltd.", "Sällanköp", "Japan", "JPY", False),
+    "8154.T": ("Kaga Electronics Co.,Ltd.", "Teknik", "Japan", "JPY", False),
+    "8194.T": ("Life Corporation", "Dagligvaror", "Japan", "JPY", False),
+    "9436.T": ("Okinawa Cellular Telephone Company", "Telekom", "Japan", "JPY", False),
+    "ACIW": ("ACI Worldwide, Inc.", "Teknik", "USA", "USD", True),
+    "ADUS": ("Addus HomeCare Corporation", "Hälsovård", "USA", "USD", True),
+    "AEO": ("American Eagle Outfitters, Inc.", "Sällanköp", "USA", "USD", True),
+    "AIT": ("Applied Industrial Technologies, Inc.", "Industri", "USA", "USD", True),
+    "AMBEA.ST": ("Ambea", "Hälsovård", "Sverige", "SEK", False),
+    "APEI": ("American Public Education, Inc.", "Dagligvaror", "USA", "USD", True),
+    "ARL.JO": ("Astral Foods Limited", "Dagligvaror", "Sydafrika", "ZAc", False),
+    "ASO": ("Academy Sports and Outdoors, Inc.", "Sällanköp", "USA", "USD", True),
+    "ATAT": ("Atour Lifestyle Holdings Limited", "Sällanköp", "USA", "USD", True),
+    "ATZ.TO": ("Aritzia Inc.", "Sällanköp", "Kanada", "CAD", False),
+    "AVAH": ("Aveanna Healthcare Holdings Inc.", "Hälsovård", "USA", "USD", True),
+    "AZZ": ("AZZ Inc.", "Tjänster", "USA", "USD", True),
+    "BDC": ("Belden Inc.", "Teknik", "USA", "USD", True),
+    "BELFB": ("Bel Fuse Inc.", "Teknik", "USA", "USD", True),
+    "BFH": ("Bread Financial Holdings, Inc.", "Finans", "USA", "USD", True),
+    "BLBD": ("Blue Bird Corporation", "Industri", "USA", "USD", True),
+    "BY": ("Byline Bancorp, Inc.", "Bank", "USA", "USD", True),
+    "CARG": ("CarGurus, Inc.", "Media", "USA", "USD", True),
+    "CCSI": ("Consensus Cloud Solutions, Inc.", "Teknik", "USA", "USD", True),
+    "CENT": ("Central Garden & Pet Company", "Dagligvaror", "USA", "USD", True),
+    "CENX": ("Century Aluminum Company", "Råvaror", "USA", "USD", True),
+    "CHCO": ("City Holding Company", "Bank", "USA", "USD", True),
+    "CIE.MC": ("CIE Automotive, S.A.", "Fordon", "Spanien", "EUR", False),
+    "CNK": ("Cinemark Holdings, Inc.", "Media", "USA", "USD", True),
+    "COCO": ("The Vita Coco Company, Inc.", "Dagligvaror", "USA", "USD", True),
+    "CPA": ("Copa Holdings, S.A.", "Transport", "USA", "USD", True),
+    "CPKR.TO": ("Canada Packers Inc.", "Dagligvaror", "Kanada", "CAD", False),
+    "CSTM": ("Constellium SE", "Råvaror", "USA", "USD", True),
+    "CVSA": ("Covista Inc.", "Dagligvaror", "USA", "USD", True),
+    "DAN": ("Dana Incorporated", "Fordon", "USA", "USD", True),
+    "DGII": ("Digi International Inc.", "Teknik", "USA", "USD", True),
+    "DPM.TO": ("DPM Metals Inc.", "Råvaror", "Kanada", "CAD", False),
+    "EME": ("EMCOR Group, Inc.", "Bygg", "USA", "USD", True),
+    "EPR.OL": ("Europris ASA", "Dagligvaror", "Norge", "NOK", False),
+    "EVS.BR": ("EVS SA", "Teknik", "Belgien", "EUR", False),
+    "EXE.TO": ("Extendicare Inc.", "Hälsovård", "Kanada", "CAD", False),
+    "EXTR": ("Extreme Networks, Inc.", "Teknik", "USA", "USD", True),
+    "FHI": ("Federated Hermes, Inc.", "Investmentbolag", "USA", "USD", True),
+    "FSBC": ("Five Star Bancorp", "Bank", "USA", "USD", True),
+    "FSS": ("Federal Signal Corporation", "Industri", "USA", "USD", True),
+    "FTDR": ("Frontdoor, Inc.", "Sällanköp", "USA", "USD", True),
+    "FTT.TO": ("Finning International Inc.", "Industri", "Kanada", "CAD", False),
+    "FULT": ("Fulton Financial Corporation", "Bank", "USA", "USD", True),
+    "GBF.DE": ("Bilfinger SE", "Bygg", "Tyskland", "EUR", False),
+    "GVA": ("Granite Construction Incorporated", "Bygg", "USA", "USD", True),
+    "HAUTO.OL": ("Höegh Autoliners ASA", "Transport", "Norge", "NOK", False),
+    "HCHDF": ("Hochschild Mining plc", "Råvaror", "USA", "USD", True),
+    "HCI": ("HCI Group, Inc.", "Finans", "USA", "USD", True),
+    "HCSG": ("Healthcare Services Group, Inc.", "Hälsovård", "USA", "USD", True),
+    "HLUN-A.CO": ("H. Lundbeck A/S", "Hälsovård", "Danmark", "DKK", False),
+    "HURN": ("Huron Consulting Group Inc.", "Tjänster", "USA", "USD", True),
+    "HWC": ("Hancock Whitney Corporation", "Bank", "USA", "USD", True),
+    "ITRN": ("Ituran Location and Control Ltd.", "Teknik", "USA", "USD", True),
+    "KCR.HE": ("Konecranes Plc", "Industri", "Finland", "EUR", False),
+    "KFY": ("Korn Ferry", "Tjänster", "USA", "USD", True),
+    "KMT": ("Kennametal Inc.", "Industri", "USA", "USD", True),
+    "KRT": ("Karat Packaging Inc.", "Sällanköp", "USA", "USD", True),
+    "LCII": ("LCI Industries", "Sällanköp", "USA", "USD", True),
+    "LIVN": ("LivaNova PLC", "Hälsovård", "USA", "USD", True),
+    "LMAT": ("LeMaitre Vascular, Inc.", "Hälsovård", "USA", "USD", True),
+    "LNR.TO": ("Linamar Corporation", "Fordon", "Kanada", "CAD", False),
+    "LOOMIS.ST": ("Loomis", "Tjänster", "Sverige", "SEK", False),
+    "LOPE": ("Grand Canyon Education, Inc.", "Dagligvaror", "USA", "USD", True),
+    "MD": ("Pediatrix Medical Group, Inc.", "Hälsovård", "USA", "USD", True),
+    "MTH.JO": ("Motus Holdings Limited", "Fordon", "Sydafrika", "ZAc", False),
+    "MWA": ("Mueller Water Products, Inc.", "Industri", "USA", "USD", True),
+    "MX.TO": ("Methanex Corporation", "Kemi", "Kanada", "CAD", False),
+    "MYRG": ("MYR Group Inc.", "Bygg", "USA", "USD", True),
+    "NAS.OL": ("Norwegian Air Shuttle ASA", "Transport", "Norge", "NOK", False),
+    "NSSC": ("Napco Security Technologies, Inc.", "Tjänster", "USA", "USD", True),
+    "NWH.AX": ("NRW Holdings Limited", "Industri", "Australien", "AUD", False),
+    "OOMA": ("Ooma, Inc.", "Teknik", "USA", "USD", True),
+    "OPLN": ("OPENLANE, Inc.", "Fordon", "USA", "USD", True),
+    "OV8.SI": ("Sheng Siong Group Ltd", "Dagligvaror", "Singapore", "SGD", False),
+    "P34.SI": ("Delfi Limited", "Dagligvaror", "Singapore", "SGD", False),
+    "P8Z.SI": ("Bumitama Agri Ltd.", "Dagligvaror", "Singapore", "SGD", False),
+    "PAAL-B.CO": ("Per Aarsleff Holding A/S", "Bygg", "Danmark", "DKK", False),
+    "PAHC": ("Phibro Animal Health Corporation", "Hälsovård", "USA", "USD", True),
+    "PAL.VI": ("Palfinger AG", "Industri", "Österrike", "EUR", False),
+    "PFBC": ("Preferred Bank", "Bank", "USA", "USD", True),
+    "PIHLIS.HE": ("Pihlajalinna Oyj", "Hälsovård", "Finland", "EUR", False),
+    "PLOW": ("Douglas Dynamics, Inc.", "Fordon", "USA", "USD", True),
+    "PRLB": ("Proto Labs, Inc.", "Industri", "USA", "USD", True),
+    "QLYS": ("Qualys, Inc.", "Teknik", "USA", "USD", True),
+    "RAY.TO": ("Stingray Group Inc.", "Media", "Kanada", "CAD", False),
+    "RVRC.ST": ("RevolutionRace", "Sällanköp", "Sverige", "SEK", False),
+    "SATS.OL": ("Sats ASA", "Sällanköp", "Norge", "NOK", False),
+    "SFL.MI": ("Safilo Group S.p.A.", "Hälsovård", "Italien", "EUR", False),
+    "SIG": ("Signet Jewelers Limited", "Sällanköp", "USA", "USD", True),
+    "SIMO": ("Silicon Motion Technology Corporation", "Halvledare", "USA", "USD", True),
+    "SIS.TO": ("Savaria Corporation", "Industri", "Kanada", "CAD", False),
+    "SKYW": ("SkyWest, Inc.", "Transport", "USA", "USD", True),
+    "SNT.JO": ("Santam Ltd", "Finans", "Sydafrika", "ZAc", False),
+    "SRG.AX": ("SRG Global Limited", "Bygg", "Australien", "AUD", False),
+    "TCL-A.TO": ("Transcontinental Inc.", "Sällanköp", "Kanada", "CAD", False),
+    "TCMD": ("Tactile Systems Technology, Inc.", "Hälsovård", "USA", "USD", True),
+    "TDC": ("Teradata Corporation", "Teknik", "USA", "USD", True),
+    "TGYM.MI": ("Technogym S.p.A.", "Sällanköp", "Italien", "EUR", False),
+    "TRMK": ("Trustmark Corporation", "Bank", "USA", "USD", True),
+    "TRN.L": ("Trainline plc", "Sällanköp", "Storbritannien", "GBp", False),
+    "UPWK": ("Upwork Inc.", "Media", "USA", "USD", True),
+    "VCT.PA": ("Vicat S.A.", "Bygg", "Frankrike", "EUR", False),
+    "VEI.OL": ("Veidekke ASA", "Bygg", "Norge", "NOK", False),
+    "VSXY": ("Victorias Secret & Co.", "Sällanköp", "USA", "USD", True),
+    "WAFD": ("WaFd, Inc.", "Bank", "USA", "USD", True),
+    "WJX.TO": ("Wajax Corporation", "Industri", "Kanada", "CAD", False),
+    "WTS": ("Watts Water Technologies, Inc.", "Industri", "USA", "USD", True),
+    "WWW": ("Wolverine World Wide, Inc.", "Sällanköp", "USA", "USD", True),
+    "YETI": ("YETI Holdings, Inc.", "Sällanköp", "USA", "USD", True),
+    "ZEHN.SW": ("Zehnder Group AG", "Bygg", "Schweiz", "CHF", False),
+}
+
 # Grupperna är åtskilda av en anledning som är statistisk, inte kosmetisk.
 # Percentilerna räknas INOM gruppen. Ett halvledarbolag jämfört med Axfood får
 # alltid usel värderingspercentil — inte för att det är dyrt för att vara
@@ -287,6 +441,7 @@ USA.update(HALVLEDARE_AI)
 GRUPPER = {
     "karna": "Kärna — svenska storbolag och amerikanska large cap",
     "halvledare_ai": "Halvledare & AI — SOXX-korgen plus AI-infrastruktur och mjukvara",
+    "smabolag_global": "Småbolag Global — innehaven i Simplicity Småbolag Global, världen över",
 }
 
 
@@ -306,6 +461,12 @@ def bygg_universum(extra: dict | None = None, grupper: list | None = None) -> di
         ut[sym] = {"symbol": sym, "namn": namn, "bransch": bransch,
                    "marknad": "USA", "valuta": "USD", "edgar": True,
                    "grupp": "halvledare_ai" if sym in HALVLEDARE_AI else "karna"}
+    for sym, (namn, bransch, mark, val, edgar) in SMABOLAG_GLOBAL.items():
+        if sym in ut:          # redan med i kärnan eller halvledargruppen
+            continue
+        ut[sym] = {"symbol": sym, "namn": namn, "bransch": bransch,
+                   "marknad": mark, "valuta": val, "edgar": edgar,
+                   "grupp": "smabolag_global"}
     for sym, meta in (extra or {}).items():
         ut[sym] = {
             "symbol": sym,

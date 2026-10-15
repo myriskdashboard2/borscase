@@ -365,7 +365,14 @@ def yahoo_info(symbol: str, max_alder_h: float = 12) -> dict:
         except Exception:
             info = {}
     behall = {k: v for k, v in info.items() if isinstance(v, (str, int, float, bool, type(None)))}
-    if behall:
+    # yfinance svarar {"trailingPegRatio": null} när hämtningen misslyckas — en
+    # dict som är sann men tom på innehåll. Cachades den slogs bolaget ut ur
+    # skanningen i tolv timmar utan att något sa varför. Samma fälla som sänkte
+    # insynstestet: ett misslyckat anrop får aldrig se ut som data.
+    riktigt = any(behall.get(f) is not None for f in
+                  ("longName", "shortName", "marketCap", "currency",
+                   "regularMarketPrice", "financialCurrency"))
+    if riktigt:
         cache_skriv(nyckel, behall)
     return behall
 
@@ -432,10 +439,27 @@ def yahoo_bokslut(symbol: str, max_alder_h: float = 24 * 7) -> dict:
     return ut
 
 
+# Några börser noterar i valutans HUNDRADEL medan boksluten står i hela
+# enheter: London i pence (GBp), Johannesburg i cent (ZAc), Tel Aviv i
+# agorot (ILA). Det är ingen växelkurs utan en enhet — hundra pence ÄR ett
+# pund — men Yahoo har ingen "GBpGBP=X" att hämta, så utan den här tabellen
+# föll bolagen ur skanningen med "växelkurs saknas". Alternativet, att låta
+# kursen bli 1,0, hade gjort varje nyckeltal hundra gånger fel utan att
+# synas.
+UNDERENHET = {"GBp": ("GBP", 0.01), "GBX": ("GBP", 0.01),
+              "ZAc": ("ZAR", 0.01), "ZAC": ("ZAR", 0.01),
+              "ILA": ("ILS", 0.01)}
+
+
 def valutakurs(fran: str, till: str, max_alder_h: float = 12) -> float:
     """Växelkurs via Yahoo, t.ex. USD->SEK. 1.0 om samma valuta."""
     if not fran or not till or fran == till:
         return 1.0
+    for liten, (hel, faktor) in UNDERENHET.items():
+        if fran == liten:
+            return faktor * valutakurs(hel, till, max_alder_h)
+        if till == liten:
+            return valutakurs(fran, hel, max_alder_h) / faktor
     nyckel = f"fx_{fran}_{till}"
     cachad = cache_las(nyckel, max_alder_h)
     if cachad:

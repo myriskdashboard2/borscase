@@ -440,6 +440,17 @@ def marknadsdata(symbol: str, meta: dict) -> dict:
     kurs_valuta = info.get("currency") or meta.get("valuta")
     rapport_valuta = info.get("financialCurrency") or kurs_valuta
     kurser = dk.yahoo_kurser(symbol, period="10y")
+
+    # Johannesburg noterar i cent och London i pence, men Yahoos marketCap
+    # står ändå i hela rand respektive pund — kontrollräknat: för ARL.JO är
+    # marketCap exakt pris × antal aktier × 0,01. Räknas börsvärdet om med
+    # samma faktor som kursen blir varje nyckeltal hundra gånger fel. Därför
+    # normaliseras KURSEN till hela enheter, och börsvärdet lämnas i fred.
+    if kurs_valuta in dk.UNDERENHET:
+        hel, faktor = dk.UNDERENHET[kurs_valuta]
+        kurser = kurser * faktor
+        kurs_valuta = hel
+
     pris = float(kurser.iloc[-1]) if len(kurser) else info.get("currentPrice")
 
     borsvarde = info.get("marketCap")

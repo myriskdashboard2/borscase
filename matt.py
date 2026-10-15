@@ -381,8 +381,11 @@ def tillgangstillvaxt(b, b_forra):
     har gett sämre avkastning de följande åren — förvärv och investeringar görs
     oftast som mest när optimismen är som störst. Över 30 %/år är en flagga.
     """
-    return None if _v(b_forra, "tillgangar") in (None, 0) else \
-        d(_v(b, "tillgangar"), _v(b_forra, "tillgangar")) - 1
+    # Kvoten plockas ut först. Saknas ÅRETS tillgångar ger d() None, och
+    # "None - 1" sänkte hela bolagets post: täckning 0, ingen poäng och
+    # ingenting som sa varför. Toyo Tire föll på precis det.
+    kvot = d(_v(b, "tillgangar"), _v(b_forra, "tillgangar"))
+    return None if kvot is None else kvot - 1
 
 
 def nettoemission(b, b_forra):

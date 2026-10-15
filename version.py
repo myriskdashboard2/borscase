@@ -9,10 +9,15 @@ Versionen visas i sidhuvudet tillsammans med när skanningen gjordes, så att
 båda frågorna besvaras på en gång: rätt PROGRAM och färsk DATA.
 """
 
-VERSION = "2.2"
-DATUM = "2026-09-17"
+VERSION = "2.3"
+DATUM = "2026-10-15"
 
 NYHETER = [
+    ("2.3", "2026-10-15",
+     "Innehaven i Simplicity Småbolag Global tillagda som egen grupp — 350 bolag "
+     "och tjugo nya marknader. Installationen står nu först i Hjälp-fliken. "
+     "Tre cachefel rättade: ett misslyckat anrop fick se ut som data, vilket "
+     "tyst slog ut bolag ur skanningen."),
     ("2.2", "2026-09-17",
      "Novo Nordisk tillagd — 218 bolag. Rapporter som bara hänvisar vidare i "
      "stället för att skriva ut riskavsnittet underkänns nu i stället för att "

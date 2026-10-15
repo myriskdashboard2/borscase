@@ -47,7 +47,7 @@ def las_installningar() -> dict:
         # Stödlänkar. Appen är gratis; det här är enda stället den ber om något.
         "stod_bmac": "https://buymeacoffee.com/myriskdashk",
         "stod_paypal": "https://paypal.me/myriskdashboard",
-        "grupper": ["karna", "halvledare_ai"],
+        "grupper": ["karna", "halvledare_ai", "smabolag_global"],
         "egna_bolag": {},
         "sec_kontakt": "",
     }
@@ -97,10 +97,19 @@ def samla_bolag(sym: str, meta: dict, las_rapport: bool, rapportdjup: int) -> di
                     if not rapport.get("tillganglig"):
                         # Utländska bolag noterade i USA lämnar 20-F i stället.
                         rapport = rl.analysera_bolag(sym, "20-F", rapportdjup)
-                else:
+                elif meta.get("marknad") == "Sverige":
                     # Svenska bolag: rapporterna hämtas via MFN i stället, och
                     # jämförs mot samma period föregående år.
                     rapport = sv.analysera_svenskt_bolag(sym, meta["namn"], rapportdjup)
+                else:
+                    # Varken SEC eller MFN känner bolaget. MFN indexerar bara
+                    # svenska emittenter, så att fråga den om ett norskt eller
+                    # japanskt bolag ger alltid tomt — och ett tomt svar såg
+                    # likadant ut som en rapport som inte gick att läsa.
+                    rapport = {"tillganglig": False,
+                               "skal": "Ingen rapportkälla för %s — appen läser "
+                                       "fulltext bara från SEC (USA) och MFN "
+                                       "(Sverige)." % meta.get("marknad", "marknaden")}
             except Exception as e:
                 rapport = {"tillganglig": False, "skal": f"Rapportfel: {e}"}
 

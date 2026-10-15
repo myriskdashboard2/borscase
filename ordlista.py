@@ -12,16 +12,32 @@ blint på, och det är farligare än att inte ha måttet alls.
 STEG = [
     {
         "nr": 1,
-        "rubrik": "Kör en skanning",
-        "text": "Tryck på <b>Kör ny skanning</b> uppe till höger i Jakt-fliken, eller "
-                "dubbelklicka SKANNA.bat. Appen hämtar då bokslut, kurser och "
-                "årsredovisningar för alla 217 bolag. Första gången tar det 15–30 "
-                "minuter, sedan under en minut eftersom allt sparas på din dator.",
-        "tips": "Du behöver inte göra det oftare än ungefär en gång i månaden. "
-                "Bokslut kommer fyra gånger om året.",
+        "rubrik": "Packa upp zip-filen — avblockera den först",
+        "text": "Ladda ner zip-filen. <b>Högerklicka på den och välj Egenskaper.</b> "
+                "Längst ner står det att filen kommer från en annan dator och kan ha "
+                "blockerats för att skydda datorn — <b>kryssa i rutan Avblockera</b> "
+                "och tryck OK. Gör det <b>innan</b> du packar upp, annars måste du göra "
+                "om det på varenda fil inuti. Packa sedan upp allt i den mapp där du "
+                "vill ha programmet, och läs LAS_MIG-filen som följer med.",
+        "tips": "Windows blockerar allt som laddats ner från internet. Hoppar du över "
+                "avblockeringen startar programmet ändå, men enskilda filer kan vägra "
+                "köra utan att förklara varför.",
     },
     {
         "nr": 2,
+        "rubrik": "Kör den första skanningen",
+        "text": "Starta programmet och gå till fliken <b>Jakt</b>. Tryck på "
+                "<b>Kör ny skanning</b> uppe till höger, eller dubbelklicka SKANNA.bat. "
+                "Appen hämtar bokslut, kurser och årsredovisningar för alla bolag som "
+                "är med. Första gången tar det <b>ungefär en kvart</b>, beroende på hur "
+                "din uppkoppling mår. Allt som hämtas sparas i mappen <code>cache</code> "
+                "inuti programmappen, så nästa skanning tar under en minut.",
+        "tips": "Du behöver inte skanna oftare än ungefär en gång i månaden — bokslut "
+                "kommer fyra gånger om året. Och kommer det in mycket kaffe lägger jag "
+                "till fler bolag. :)",
+    },
+    {
+        "nr": 3,
         "rubrik": "Sålla bort det mesta",
         "text": "Sätt <b>Minsta täckning</b> till 100 % och <b>Varningar</b> till "
                 "\"bara utan varning\". Nu ser du bara bolag där hela modellen kunde "
@@ -32,7 +48,7 @@ STEG = [
                 "NEJ än JA.",
     },
     {
-        "nr": 3,
+        "nr": 4,
         "rubrik": "Titta på pelarna, inte på poängen",
         "text": "Varje bolag får betyg i sex pelare. Det du letar efter är ett bolag "
                 "som är högt på <b>Kvalitet</b> OCH högt på <b>Värdering</b> samtidigt "
@@ -43,7 +59,7 @@ STEG = [
                 "och klarade inte testet — se Validering-fliken. Läs pelarna i stället.",
     },
     {
-        "nr": 4,
+        "nr": 5,
         "rubrik": "Öppna bolaget och läs i rätt ordning",
         "text": "Klicka på raden. Läs sedan: först <b>Det som talar emot</b>, sedan "
                 "<b>Det som talar för</b>, sedan <b>Rapporten</b> längst ned. Att läsa "
@@ -54,7 +70,7 @@ STEG = [
                 "vad som förändrats.",
     },
     {
-        "nr": 5,
+        "nr": 6,
         "rubrik": "Skriv av \"Vad som skulle göra caset fel\"",
         "text": "Längst ned i varje bolag finns en lista med konkreta villkor som "
                 "skulle motbevisa caset. Klistra in den i ett anteckningsblock "
@@ -65,7 +81,7 @@ STEG = [
                 "att hoppas.",
     },
     {
-        "nr": 6,
+        "nr": 7,
         "rubrik": "Kolla när rapporten kommer",
         "text": "Kolumnen <b>Rapport</b> visar hur många dagar det är kvar till nästa "
                 "rapport, och under den hur mycket aktien BRUKAR röra sig den dagen. "
@@ -76,7 +92,7 @@ STEG = [
                 "däremot ett faktum.",
     },
     {
-        "nr": 7,
+        "nr": 8,
         "rubrik": "Läs Validering-fliken innan du agerar",
         "text": "Där står vad appens rangordning faktiskt klarade när den testades mot "
                 "verkligheten, år för år, med enbart information som fanns då. Svaret "

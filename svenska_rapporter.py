@@ -77,7 +77,11 @@ def _hamta_json(url: str):
 
 
 def gissa_slug(namn: str) -> str:
-    n = re.sub(r"\s+(A|B|C|SDB|AB|B SDB)$", "", namn).strip()
+    # "(publ)" och bolagsformen ingår aldrig i MFN:s id. Utan den här
+    # städningen blev "Loomis AB (publ)" till "loomis-ab-publ", som inte
+    # finns, och rapporten såg ut att saknas.
+    n = re.sub(r"\s*\(publ\)", "", namn, flags=re.I)
+    n = re.sub(r"\s+(A|B|C|SDB|AB|B SDB)$", "", n).strip()
     n = unicodedata.normalize("NFKD", n).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]+", "-", n.lower()).strip("-")
 
@@ -92,9 +96,11 @@ def mfn_slug(symbol: str, namn: str, max_alder_h: float = 24 * 30) -> str | None
         return cachad.get("slug")
 
     slug = None
+    lyckades = False          # skiljer "sökte, hittade inget" från "sökningen gick inte"
     gissning = gissa_slug(namn)
     try:
         d = _hamta_json(f"{MFN_BAS}?limit=2&author={gissning}")
+        lyckades = True
         if d.get("items"):
             slug = gissning
     except Exception:
@@ -112,10 +118,16 @@ def mfn_slug(symbol: str, namn: str, max_alder_h: float = 24 * 30) -> str | None
                     bast = (p, a["slug"])
             if bast and bast[0] > 0.6:
                 slug = bast[1]
+            lyckades = True
         except Exception:
             pass
 
-    dk.cache_skriv(nyckel, {"slug": slug})
+    # Ett misslyckat anrop får ALDRIG cachas. Cachetiden här är trettio
+    # dygn, så ett tillfälligt avbrott mot MFN hade annars stämplat bolaget
+    # som "har inga rapporter" en månad framåt — utan att något sa varför.
+    # Samma fel som en gång gav insynstestet ett p-värde på 0,003.
+    if slug or lyckades:
+        dk.cache_skriv(nyckel, {"slug": slug})
     return slug
 
 
